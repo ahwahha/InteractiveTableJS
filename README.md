@@ -1,7 +1,7 @@
 # InteractiveTableJS
 Highly configurable and interactive HTML table JS library
 <br>
-Just include the InteractiveTable.js file no matter how to html page to use.<br
+Just include the InteractiveTable.js file no matter how to html page to use.<br>
 <br>
 In brief, this table accepts an array of objects of key-value-pairs, eg:<br>
 `array = [{ "key1":"value1", "key2":"value2"}, {"key1":"value3", "key2":"value4"} ...];`
