@@ -79,4 +79,7 @@ You get the subset of the table's data of currently selected/filtered/edited by 
 `.getFiltered()`<br>
 `.getEdited()`<br>
 <br>
+Oh if you wish not allowing multiple rows to be able to be selected<br>
+change that `"multiSelect"` property as false.<br>
+<br>
 You can open and modify the example HTML file to see what it does.
