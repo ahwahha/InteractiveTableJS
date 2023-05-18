@@ -1,10 +1,8 @@
 # InteractiveTableJS
 Highly configurable and interactive HTML table JS library
-
-Just include the InteractiveTable.js file no matter how to html page to use.
-
-Will update the readme later.
-
+<br>
+Just include the InteractiveTable.js file no matter how to html page to use.<br
+<br>
 In brief, this table accepts an array of objects of key-value-pairs, eg:<br>
 `array = [{ "key1":"value1", "key2":"value2"}, {"key1":"value3", "key2":"value4"} ...];`
 <br>
@@ -23,7 +21,18 @@ inside what you return, you may put: <br>
 `.printCheckBox(row)` which, when exists, turn on the selecting functionality of the table, and<br>
 `.editData(row['row-index'], key, value)` which replace the cell value by your input.<br>
 `.refreshTable()` whenever you need to refresh the content to be shown, eg. after .editData be called.<br>
-
+<br>
+You can modify text you see on buttons and number of selected notice by change below properties in tableSettings:<br>
+`"selectAllFiltered"`<br>
+`"unselectAllFiltered"`<br>
+`"noOfSelected"`<br>
+`"resetFilters"`<br>
+`"resetEdits"`<br>
+`"toBegining"`<br>
+`"previousPage"`<br>
+`"nextPage"`<br>
+`"toEnding"`<br>
+<br>
 Default tableSettings is :<br>
 `{
 	"label": "",
