@@ -4,7 +4,7 @@ Highly configurable and interactive HTML table JS library
 Just include the InteractiveTable.js file no matter how to html page to use.<br>
 <br>
 In brief, this table accepts an array of objects of key-value-pairs, eg:<br>
-`array = [{ "key1":"value1", "key2":"value2"}, {"key1":"value3", "key2":"value4"} ...];`
+`array = [{ "key1":"value1", "key2":"value2"}, {"key1":"value3", "key2":"value4"} ...];`<br>
 <br>
 In most cases you just first obtain the table object by passing it's variable name into it. eg:<br>
 `const tableName = InteractiveTable('tableName');`<br>
@@ -12,7 +12,7 @@ In most cases you just first obtain the table object by passing it's variable na
 Then three functions to make it starts working:<br>
 `.setData(array)` : to set the data to the table object.<br>
 `.setTableSettings(setting)` : to overwrite default properties if exists in the input object.<br>
-`.fillTable(containerName)` : to write the content into the container.<br>
+`.fillTable(containerName)` : to write the content into the container named as the input.<br>
 <br>
 There should be one property in tableSetting with key 'columns' which is an array of objects of properties defining what columns with what values to be shown.<br>
 `'header'` to be the tag shown in the header row<br>
