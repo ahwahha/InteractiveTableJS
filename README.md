@@ -72,6 +72,10 @@ Default tableSettings is :<br>
 	"previousPage": '<',
 	"nextPage": '>',
 	"toEnding": '>>'
-    }`
-
+    }`<br>
+<br>
+You get the subset of the table's data of currently selected/filtered/edited by below functions:<br>
+`.getSelected()`<br>
+`.getFiltered()`<br>
+`.getEdited()`<br>
 You can open and modify the example HTML file to see what it does.
