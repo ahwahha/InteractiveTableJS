@@ -1,5 +1,5 @@
 # InteractiveTableJS
-Highly configurable and interactive HTML table JS library
+Highly configurable and interactive HTML table pure JS library
 <br>
 Just include the InteractiveTable.js file no matter how to html page to use.<br>
 <br>
