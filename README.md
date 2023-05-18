@@ -78,4 +78,5 @@ You get the subset of the table's data of currently selected/filtered/edited by 
 `.getSelected()`<br>
 `.getFiltered()`<br>
 `.getEdited()`<br>
+<br>
 You can open and modify the example HTML file to see what it does.
