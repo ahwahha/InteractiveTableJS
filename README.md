@@ -14,8 +14,10 @@ Then three functions to make it starts working:<br>
 `.setTableSettings(setting)` : to overwrite default properties if exists in the input object.<br>
 `.fillTable(containerName)` : to write the content into the container.<br>
 <br>
-There should be one property in tableSetting with key 'columns' which is an array of objects of properties.<br>
-These properties may contain one with key 'modifier' valued as<br>
+There should be one property in tableSetting with key 'columns' which is an array of objects of properties defining what columns with what values to be shown.<br>
+`'header'` to be the tag shown in the header row<br>
+`'data'` to be the property key of the row value to be shown<br>
+These properties may optionally contain one with key 'modifier' valued as below to replace what is orginally to be shown<br>
 `'(row)=>{ /*return whatever you want while row is the current iteration of the array you passed in*/ }'`<br>
 inside what you return, you may put: <br>
 `.printCheckBox(row)` which, when exists, turn on the selecting functionality of the table, and<br>
