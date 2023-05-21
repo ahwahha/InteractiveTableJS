@@ -33,6 +33,8 @@ function InteractiveTable(id) {
 		"rowsStyle": 'text-align:center; font-size:12px;',
 		"oddRowsStyle": '',
 		"evenRowsStyle": 'background-color:#f9f9f9;',
+		"actionsGroupStyle": '',
+		"paginationGroupStyle": '',
 		"maxHeight": undefined,
 		"selectAllFiltered": 'Select all filtered',
 		"unselectAllFiltered": 'Unselect all filtered',
@@ -477,7 +479,7 @@ function InteractiveTable(id) {
 			const previousButton = '<button class="' + tableSettings['buttonClass'] + '" onclick="' + identifier + '.priviousPage().refreshTable();">' + tableSettings['previousPage'] + '</button>';
 			const nextButton = '<button class="' + tableSettings['buttonClass'] + '" onclick="' + identifier + '.nextPage().refreshTable();">' + tableSettings['nextPage'] + '</button>';
 			const toEndingButton = '<button class="' + tableSettings['buttonClass'] + '" onclick="' + identifier + '.toEnding().refreshTable();">' + tableSettings['toEnding'] + '</button>';
-			return '<div style=\'width:100%;display:flex;flex-flow:row wrap;justify-content:center;align-items:center;column-gap:5px;\'><div>' + toBeginingButton + previousButton + '</div><div>' + startInput + '<span style=\'margin: 0px 5px;\'>-</span>' + endInput + '<span style=\'margin: 0px 5px;\'>/</span>' + totalRows + '</div><div>' + nextButton + toEndingButton + '</div></div>';
+			return '<div style=\'width:100%;display:flex;flex-flow:row wrap;justify-content:center;align-items:center;column-gap:5px; ' + tableSettings['paginationGroupStyle'] + '\'><div>' + toBeginingButton + previousButton + '</div><div>' + startInput + '<span style=\'margin: 0px 5px;\'>-</span>' + endInput + '<span style=\'margin: 0px 5px;\'>/</span>' + totalRows + '</div><div>' + nextButton + toEndingButton + '</div></div>';
 		} catch (err) {
 			throw new Error("error caught @ printPaginationGroup() - " + err);
 		}
@@ -670,9 +672,11 @@ function InteractiveTable(id) {
 				+ "<div style='width:100%;display:flex;flex-flow:row wrap;justify-content:flex-start;align-items:center;column-gap:3px;'>"
 				+ "<div>" + tableSettings['label'] + "</div>"
 				+ "<div style='flex:1;'></div>"
+				+ "<div style='" + tableSettings['actionsGroupStyle'] + "'>"
 				+ printSelectingGroup()
 				+ printResetFiltersButton()
 				+ printResetEditsButton()
+				+ "</div>"
 				+ "</div>"
 				+ "<div style='width:100%;overflow:auto;" + (tableSettings['maxHeight'] ? " max-height:" + tableSettings['maxHeight'] + ";" : "") + " overflow:auto;'>" + html + "</div>"
 				+ printPaginationGroup()
