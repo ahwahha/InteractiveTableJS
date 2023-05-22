@@ -37,44 +37,69 @@ You can modify text you see on buttons and number of selected notice by change b
 <br>
 Default tableSettings is :<br>
 `{
-	"label": "",
-	"columns": [
-	    {
-		header: "Header",
-		data: "",
-		headerStyle: "",
-		filterStyle: "",
-		filter: "",
-		filterPlaceholder: "placeholder",
-		rowsStyle: "",
-		modifier: "(row)=>{return 'data:' + JSON.stringify(row);}"
-	    }
-	],
-	"start": 1,
-	"defaultStart": 1,
-	"end": 10,
-	"defaultEnd": 10,
-	"maxRows": 100,
-	"buttonClass": 'button',
-	"multiSelect": true,
-	"headersStyle": 'border: none; height:calc(100% - 8px); display:flex; flex-flow:column nowrap; background-color: #ececff; padding:3px; margin:1px; font-weight:bold; font-weight:bold; font-size:12px;',
-	"filtersStyle": 'border:#aaa solid 1px; padding:1px; border-radius:4px; margin:1px; text-align:center; font-size:10px; width: calc(100% - 2px);',
-	"rowsStyle": 'text-align:center; font-size:12px;',
-	"oddRowsStyle": '',
-	"evenRowsStyle": 'background-color:#f9f9f9;',
-	"actionsGroupStyle": '',
-	"paginationGroupStyle": '',
+		"label": "",
+		"columns": [
+			{
+				header: "Header",
+				data: "",
+				filter: "",
+				filterPlaceholder: "placeholder",
+				modifier: "(row)=>{return 'data:' + JSON.stringify(row);}",
+				headerStyle: {},
+				filterStyle: {},
+				rowsStyle: {}
+			}
+		],
+		"start": 1,
+		"defaultStart": 1,
+		"end": 10,
+		"defaultEnd": 10,
+		"maxRows": 100,
+		"buttonClass": 'button',
+		"multiSelect": true,
+		"actionsGroupStyle": '',
+		"paginationGroupStyle": '',
 		"maxHeight": undefined,
-	"selectAllFiltered": 'Select all filtered',
-	"unselectAllFiltered": 'Unselect all filtered',
-	"noOfSelected": 'No. of selected: ',
-	"resetFilters": 'Reset filters',
-	"resetEdits": 'Reset edits',
-	"toBegining": '<<',
-	"previousPage": '<',
-	"nextPage": '>',
-	"toEnding": '>>'
-    }`<br>
+		"selectAllFiltered": 'Select all filtered',
+		"unselectAllFiltered": 'Unselect all filtered',
+		"noOfSelected": 'No. of selected: ',
+		"resetFilters": 'Reset filters',
+		"resetEdits": 'Reset edits',
+		"toBegining": '<<',
+		"previousPage": '<',
+		"nextPage": '>',
+		"toEnding": '>>',
+		"headersStyle": {
+			"border": "#aaa solid 1px",
+			"height": "calc(100% - 8px)",
+			"display": "flex",
+			"flex-flow": "column nowrap",
+			"padding": "3px",
+			"border-radius": "5px",
+			"margin": "1px",
+			"text-align": "left",
+			"font-weight": "bold",
+			"font-size": "12px",
+			"background-color": "#add"
+		},
+		"filtersStyle": {
+			"border": "#aaa solid 1px",
+			"padding": "3px",
+			"border-radius": "5px",
+			"margin": "1px",
+			"text-align": "center",
+			"font-size": "12px",
+			"width": "calc(100% - 2px)"
+		},
+		"rowsStyle": {
+			"text-align": "center",
+			"font-size": "12px"
+		},
+		"oddRowsStyle": {},
+		"evenRowsStyle": {
+			"background-color": "#f9f9f9"
+		}
+	}`<br>
 <br>
 You get the subset of the table's data of currently selected/filtered/edited by below functions:<br>
 `.getSelected()`<br>
