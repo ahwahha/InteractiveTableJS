@@ -13,12 +13,12 @@ function InteractiveTable(id) {
 			{
 				header: "Header",
 				data: "",
-				headerStyle: "",
-				filterStyle: "",
 				filter: "",
 				filterPlaceholder: "placeholder",
-				rowsStyle: "",
-				modifier: "(row)=>{return 'data:' + JSON.stringify(row);}"
+				modifier: "(row)=>{return 'data:' + JSON.stringify(row);}",
+				headerStyle: {},
+				filterStyle: {},
+				rowsStyle: {}
 			}
 		],
 		"start": 1,
@@ -28,11 +28,6 @@ function InteractiveTable(id) {
 		"maxRows": 100,
 		"buttonClass": 'button',
 		"multiSelect": true,
-		"headersStyle": 'border:#aaa solid 1px; height:calc(100% - 8px); display:flex; flex-flow:column nowrap; padding:3px; border-radius:5px; margin:1px; text-align:left; font-weight:bold; font-size:12px; background-color:#add;',
-		"filtersStyle": 'border:#aaa solid 1px; padding:3px; border-radius:5px; margin:1px; text-align:center; font-size:12px; width: calc(100% - 2px);',
-		"rowsStyle": 'text-align:center; font-size:12px;',
-		"oddRowsStyle": '',
-		"evenRowsStyle": 'background-color:#f9f9f9;',
 		"actionsGroupStyle": '',
 		"paginationGroupStyle": '',
 		"maxHeight": undefined,
@@ -44,10 +39,52 @@ function InteractiveTable(id) {
 		"toBegining": '<<',
 		"previousPage": '<',
 		"nextPage": '>',
-		"toEnding": '>>'
+		"toEnding": '>>',
+		"headersStyle": {
+			"border": "#aaa solid 1px",
+			"height": "calc(100% - 8px)",
+			"display": "flex",
+			"flex-flow": "column nowrap",
+			"padding": "3px",
+			"border-radius": "5px",
+			"margin": "1px",
+			"text-align": "left",
+			"font-weight": "bold",
+			"font-size": "12px",
+			"background-color": "#add"
+		},
+		"filtersStyle": {
+			"border": "#aaa solid 1px",
+			"padding": "3px",
+			"border-radius": "5px",
+			"margin": "1px",
+			"text-align": "center",
+			"font-size": "12px",
+			"width": "calc(100% - 2px)"
+		},
+		"rowsStyle": {
+			"text-align": "center",
+			"font-size": "12px"
+		},
+		"oddRowsStyle": {},
+		"evenRowsStyle": {
+			"background-color": "#f9f9f9"
+		}
 	};
 
 	let tableSettings = JSON.parse(JSON.stringify(tableDefaultSettings));
+
+	function toStyleString(obj) {
+		try {
+			var output = '';
+			for (const [key, value] of Object.entries(obj)) {
+				output += key + ':' + value + ';';
+			}
+			return output;
+		} catch (error) {
+			throw new Error("error caught @ toStyleString(" + obj + "): " + error);
+		}
+	}
 
 	function setData(data) {
 		try {
@@ -81,6 +118,13 @@ function InteractiveTable(id) {
 	function setTableSettings(newSettings) {
 		try {
 			tableSettings = { ...tableSettings, ...newSettings };
+
+			tableSettings['headersStyle'] = { ...tableDefaultSettings['headersStyle'], ...newSettings['headersStyle'] };
+			tableSettings['filtersStyle'] = { ...tableDefaultSettings['filtersStyle'], ...newSettings['filtersStyle'] };
+			tableSettings['rowsStyle'] = { ...tableDefaultSettings['rowsStyle'], ...newSettings['rowsStyle'] };
+			tableSettings['oddRowsStyle'] = { ...tableDefaultSettings['oddRowsStyle'], ...newSettings['oddRowsStyle'] };
+			tableSettings['evenRowsStyle'] = { ...tableDefaultSettings['evenRowsStyle'], ...newSettings['evenRowsStyle'] };
+
 			return this;
 		} catch (error) {
 			throw new Error("error caught @ setTableSettings(" + newSettings + "): " + error);
@@ -626,7 +670,7 @@ function InteractiveTable(id) {
 			/*headers*/
 			html += "<table style='width:100%;height:min-content;'><thead><tr>";
 			tableSettings['columns'].forEach(function (col) {
-				var headerStyle = (tableSettings['headersStyle'] || '') + (col['headerStyle'] || '');
+				var headerStyle = toStyleString({ ...(tableSettings['headersStyle'] || {}), ...(col['headerStyle'] || {}) });
 				var headerHtml = '<div style="' + headerStyle + '" class="sort-header ' + (sortingBy === col['data'] ? 'sorting' : '') + '" onclick="' + identifier + '.sort(\'' + col['data'] + '\', ' + (sortingBy !== col['data'] || !ascending) + ').refreshTable()"><div style="flex:1;height:0px;"></div>' + col.header + (sortingBy === col['data'] ? (ascending ? '&#9650;' : '&#9660;') : '') + '<div style="flex:1;"></div></div>';
 				html += '<td style="padding:0px;">' + headerHtml + '</td>';
 			});
@@ -635,7 +679,7 @@ function InteractiveTable(id) {
 			/*filters*/
 			html += '<tr>';
 			tableSettings['columns'].forEach(function (col) {
-				var filterStyle = (tableSettings['filtersStyle'] || '') + (col['filterStyle'] || '');
+				var filterStyle = toStyleString({ ...(tableSettings['filtersStyle'] || {}), ...(col['filterStyle'] || {}) });
 				var filterValue = col['filter'] || '';
 				var filterPlaceholder = col['filterPlaceholder'] || '';
 				html += '<td style="padding:0px;"><input style="' + filterStyle + '" class="filtering-input" type="text" style="width:100%;" value="' + stringToAscii(filterValue) + '" onchange="' + identifier + '.setFilter(' + tableSettings['columns'].indexOf(col) + ',this.value).filterRows().refreshTable();" placeholder="' + filterPlaceholder + '" /></td>';
@@ -648,10 +692,10 @@ function InteractiveTable(id) {
 			var filteredData = getFiltered(false).slice(start - 1, end);
 			filteredData.forEach(function (row, index) {
 				var rowsStyle = function (col) {
-					return (tableSettings.rowsStyle || '') + (col.rowsStyle || '');
+					return toStyleString({ ...(tableSettings.rowsStyle || ''), ...(col.rowsStyle || '') });
 				};
 				var oddEvenRowsStyle = function (col) {
-					return (index % 2 === 1 ? tableSettings.evenRowsStyle : tableSettings.oddRowsStyle);
+					return toStyleString((index % 2 === 1 ? tableSettings.evenRowsStyle : tableSettings.oddRowsStyle));
 				};
 				html += '<tr>';
 				tableSettings['columns'].forEach(function (col) {
