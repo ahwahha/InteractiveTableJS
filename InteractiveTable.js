@@ -7,7 +7,7 @@ function InteractiveTable(id) {
 	let ascending = true;
 	let haveSelection = false;
 	let edited = false;
-	let tableSettings = {
+	const tableDefaultSettings = {
 		"label": "",
 		"columns": [
 			{
@@ -46,6 +46,8 @@ function InteractiveTable(id) {
 		"nextPage": '>',
 		"toEnding": '>>'
 	};
+
+	let tableSettings = JSON.parse(JSON.stringify(tableDefaultSettings));
 
 	function setData(data) {
 		try {
@@ -443,7 +445,7 @@ function InteractiveTable(id) {
 				const noOfSelected = selectedRows.length;
 				const selectAllButton = '<button class="' + tableSettings['buttonClass'] + '" onclick="' + identifier + '.setAllFilteredSelected(true).refreshTable()">' + tableSettings.selectAllFiltered + '</button>';
 				const unselectAllButton = '<button class="' + tableSettings['buttonClass'] + '" onclick="' + identifier + '.setAllFilteredSelected(false).refreshTable()">' + tableSettings.unselectAllFiltered + '</button>';
-				return '<div style=\'display:flex;flex-flow:row wrap;justify-content:flex-start;align-items:center;column-gap:5px;\'>' + tableSettings.noOfSelected + noOfSelected + ' <div>' + selectAllButton + ' ' + unselectAllButton + '</div></div>';
+				return '<div style="display:flex;flex-flow:row wrap;justify-content:flex-start;align-items:center;column-gap:3px;">' + tableSettings.noOfSelected + noOfSelected + ' <div style="display:flex;flex-flow:row wrap;justify-content:flex-start;align-items:center;column-gap:3px;">' + selectAllButton + unselectAllButton + '</div></div>';
 			} else {
 				return '';
 			}
@@ -476,10 +478,10 @@ function InteractiveTable(id) {
 			const endInput = '<input type="text" style=\'text-align:center; padding: 3px 8px; width: ' + (Math.max(1, Math.ceil(Math.log10(tableData.length))) * 8 + 20) + 'px;\' value="' + tableSettings['end'] + '" onchange="' + identifier + '.setEnd(this.value).refreshTable()" />';
 			const totalRows = getFiltered(false).length;
 			const toBeginingButton = '<button class="' + tableSettings['buttonClass'] + '" onclick="' + identifier + '.toBegining().refreshTable();">' + tableSettings['toBegining'] + '</button>';
-			const previousButton = '<button class="' + tableSettings['buttonClass'] + '" onclick="' + identifier + '.priviousPage().refreshTable();">' + tableSettings['previousPage'] + '</button>';
-			const nextButton = '<button class="' + tableSettings['buttonClass'] + '" onclick="' + identifier + '.nextPage().refreshTable();">' + tableSettings['nextPage'] + '</button>';
+			const previousButton = '<button style="margin-left:5px;" class="' + tableSettings['buttonClass'] + '" onclick="' + identifier + '.priviousPage().refreshTable();">' + tableSettings['previousPage'] + '</button>';
+			const nextButton = '<button style="margin-right:5px;" class="' + tableSettings['buttonClass'] + '" onclick="' + identifier + '.nextPage().refreshTable();">' + tableSettings['nextPage'] + '</button>';
 			const toEndingButton = '<button class="' + tableSettings['buttonClass'] + '" onclick="' + identifier + '.toEnding().refreshTable();">' + tableSettings['toEnding'] + '</button>';
-			return '<div style=\'width:100%;display:flex;flex-flow:row wrap;justify-content:center;align-items:center;column-gap:5px; ' + tableSettings['paginationGroupStyle'] + '\'><div>' + toBeginingButton + previousButton + '</div><div>' + startInput + '<span style=\'margin: 0px 5px;\'>-</span>' + endInput + '<span style=\'margin: 0px 5px;\'>/</span>' + totalRows + '</div><div>' + nextButton + toEndingButton + '</div></div>';
+			return '<div style="' + tableSettings['paginationGroupStyle'] + '"><div style="width:100%;display:flex;flex-flow:row wrap;justify-content:center;align-items:center;column-gap:3px;"><div>' + toBeginingButton + previousButton + '</div><div>' + startInput + '<span style=\'margin: 0px 5px;\'>-</span>' + endInput + '<span style=\'margin: 0px 5px;\'>/</span>' + totalRows + '</div><div>' + nextButton + toEndingButton + '</div></div></div>';
 		} catch (err) {
 			throw new Error("error caught @ printPaginationGroup() - " + err);
 		}
@@ -673,9 +675,11 @@ function InteractiveTable(id) {
 				+ "<div>" + tableSettings['label'] + "</div>"
 				+ "<div style='flex:1;'></div>"
 				+ "<div style='" + tableSettings['actionsGroupStyle'] + "'>"
+				+ "<div style='display:flex;flex-flow:row wrap;justify-content:flex-start;align-items:center;column-gap:3px;'>"
 				+ printSelectingGroup()
 				+ printResetFiltersButton()
 				+ printResetEditsButton()
+				+ "</div>"
 				+ "</div>"
 				+ "</div>"
 				+ "<div style='width:100%;overflow:auto;" + (tableSettings['maxHeight'] ? " max-height:" + tableSettings['maxHeight'] + ";" : "") + " overflow:auto;'>" + html + "</div>"
