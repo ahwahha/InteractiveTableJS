@@ -17,8 +17,8 @@ Then three functions to make it starts working:<br>
 There should be one property in tableSettings with key 'columns' which is an array of objects of properties defining what columns with what values to be shown.<br>
 `'header'` to be the tag shown in the header row<br>
 `'data'` to be the property key of the row value to be shown<br>
-These properties may optionally contain one with key 'modifier' valued as below to replace what is orginally to be shown<br>
-`'(row)=>{ /*return whatever you want while row is the current iteration of the array you passed in*/ }'`<br>
+These properties may optionally contain one with key 'modifier' valued as a Function like below to replace what is orginally to be shown<br>
+`new Function('row', '/*return whatever you want while row is the current iteration of the array you passed in*/')`<br>
 inside what you return, you may put: <br>
 `.printCheckBox(row)` which, when exists, turn on the selecting functionality of the table, and<br>
 `.editData(row['row-index'], key, value)` which replace the cell value by your input.<br>

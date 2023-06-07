@@ -25,7 +25,7 @@
 	</style>
 	<script>
 		// create an instance of the InteractiveTable class
-		const myTable = InteractiveTable('myTable');
+		const myTable = new InteractiveTable('myTable');
 
 		// set the data for the table
 		myTable.setData(JSON.parse('[{"name": "Alice", "age": 25, "title": "Engineer", "location": "San Francisco", "datetimeOfBirth": "1998-11-27 04:34:23"}, {"name": "Bob", "age": 30, "title": "Manager", "location": "New York", "datetimeOfBirth": "1993-05-11 14:56:07"}, {"name": "Charlie", "age": 20, "title": "Designer", "location": "Los Angeles", "datetimeOfBirth": "2003-02-18 23:22:42"}, {"name": "David", "age": 28, "title": "Developer", "location": "Chicago", "datetimeOfBirth": "1995-09-21 08:43:17"}, {"name": "Emily", "age": 35, "title": "Director", "location": "Seattle", "datetimeOfBirth": "1988-08-30 03:12:34"}, {"name": "Frank", "age": 22, "title": "Intern", "location": "Boston", "datetimeOfBirth": "2001-07-09 19:27:56"}, {"name": "Grace", "age": 27, "title": "Analyst", "location": "Austin", "datetimeOfBirth": "1996-01-04 10:15:51"}, {"name": "Henry", "age": 33, "title": "Consultant", "location": "Washington, D.C.", "datetimeOfBirth": "1989-12-25 22:48:09"}, {"name": "Isabella", "age": 24, "title": "Programmer", "location": "San Diego", "datetimeOfBirth": "1999-06-15 16:39:14"}, {"name": "Jacob", "age": 29, "title": "Salesperson", "location": "Houston", "datetimeOfBirth": "1994-03-28 07:59:32"}, {"name": "Katie", "age": 26, "title": "Marketing Manager", "location": "Denver", "datetimeOfBirth": "1997-10-08 12:27:45"}, {"name": "Liam", "age": 32, "title": "Product Manager", "location": "Atlanta", "datetimeOfBirth": "1991-02-02 02:18:23"}, {"name": "Mia", "age": 23, "title": "Researcher", "location": "Miami", "datetimeOfBirth": "2000-04-23 21:11:37"}, {"name": "Noah", "age": 31, "title": "Data Scientist", "location": "Philadelphia", "datetimeOfBirth": "1992-07-06 15:55:12"}, {"name": "Olivia", "age": 21, "title": "Writer", "location": "Portland", "datetimeOfBirth": "2002-12-17 06:38:54"}]'));
@@ -33,10 +33,10 @@
 		// set the settings for the table
 		myTable.setTableSettings({
 			columns: [
-				{ "header": "Select", "data": "row-selected", "rowsStyle": { "width": "50px" }, "modifier": "(row) => {return myTable.printCheckBox(row); }" },
+				{ "header": "Select", "data": "row-selected", "rowsStyle": { "width": "50px" }, "modifier": new Function('row', 'return myTable.printCheckBox(row);') },
 				{ "header": "Name", "data": "name" },
-				{ "header": "Birth At", "data": "datetimeOfBirth", "modifier": "(row)=>{return \"<input type='datetime-local' disabled value='\" + row[\"datetimeOfBirth\"] + \"'></input>\"}" },
-				{ "header": "Age", "data": "age", "modifier": "(row)=>{return \"<input type='text' style='max-width:50%;text-align:center;' value='\" + row.age + \"' onchange='myTable.editData(\"+row['row-index']+\",\"+\"&apos;age&apos;\"+ \",this.value)'></input>\";}" },
+				{ "header": "Birth At", "data": "datetimeOfBirth", "modifier": new Function('row', 'return "<input type=\'datetime-local\' disabled value=\'" + row["datetimeOfBirth"] + "\'></input>";') },
+				{ "header": "Age", "data": "age", "modifier": new Function('row', 'return "<input type=\'text\' style=\'max-width:50%;text-align:center;\' value=\'" + row.age + "\' onchange=\'myTable.editData("+row[\'row-index\']+","+"&apos;age&apos;"+ ",this.value)\'></input>";') },
 				{ "header": "Title", "data": "title" },
 				{ "header": "Location Location Location", "data": "location" }
 			],

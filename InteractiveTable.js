@@ -1,80 +1,82 @@
-function InteractiveTable(id) {
-	let identifier = id;
-	let container = null;
-	let tableData = [{ "key": "value" }];
-	let originalTableData = null;
-	let sortingBy = null;
-	let ascending = true;
-	let haveSelection = false;
-	let edited = false;
-	const tableDefaultSettings = {
-		"label": "",
-		"columns": [
-			{
-				header: "Header",
-				data: "",
-				filter: "",
-				filterPlaceholder: "placeholder",
-				modifier: "(row)=>{return 'data:' + JSON.stringify(row);}",
-				headerStyle: {},
-				filterStyle: {},
-				rowsStyle: {}
+class InteractiveTable {
+
+	constructor(id) {
+		this.identifier = id;
+		this.container = null;
+		this.tableData = [{ "key": "value" }];
+		this.originalTableData = null;
+		this.sortingBy = null;
+		this.ascending = true;
+		this.haveSelection = false;
+		this.edited = false;
+		this.tableDefaultSettings = {
+			"label": "",
+			"columns": [
+				{
+					header: "Header",
+					data: "",
+					filter: "",
+					filterPlaceholder: "placeholder",
+					modifier: "(row)=>{return 'data:' + JSON.stringify(row);}",
+					headerStyle: {},
+					filterStyle: {},
+					rowsStyle: {}
+				}
+			],
+			"start": 1,
+			"defaultStart": 1,
+			"end": 10,
+			"defaultEnd": 10,
+			"maxRows": 100,
+			"buttonClass": 'button',
+			"multiSelect": true,
+			"actionsGroupStyle": '',
+			"paginationGroupStyle": '',
+			"maxHeight": undefined,
+			"selectAllFiltered": 'Select all filtered',
+			"unselectAllFiltered": 'Unselect all filtered',
+			"noOfSelected": 'No. of selected: ',
+			"resetFilters": 'Reset filters',
+			"resetEdits": 'Reset edits',
+			"toBegining": '<<',
+			"previousPage": '<',
+			"nextPage": '>',
+			"toEnding": '>>',
+			"headersStyle": {
+				"border": "#aaa solid 1px",
+				"height": "calc(100% - 8px)",
+				"display": "flex",
+				"flex-flow": "column nowrap",
+				"padding": "3px",
+				"border-radius": "5px",
+				"margin": "1px",
+				"text-align": "left",
+				"font-weight": "bold",
+				"font-size": "12px",
+				"background-color": "#add"
+			},
+			"filtersStyle": {
+				"border": "#aaa solid 1px",
+				"padding": "3px",
+				"border-radius": "5px",
+				"margin": "1px",
+				"text-align": "center",
+				"font-size": "12px",
+				"width": "calc(100% - 2px)"
+			},
+			"rowsStyle": {
+				"text-align": "center",
+				"font-size": "12px"
+			},
+			"oddRowsStyle": {},
+			"evenRowsStyle": {
+				"background-color": "#f9f9f9"
 			}
-		],
-		"start": 1,
-		"defaultStart": 1,
-		"end": 10,
-		"defaultEnd": 10,
-		"maxRows": 100,
-		"buttonClass": 'button',
-		"multiSelect": true,
-		"actionsGroupStyle": '',
-		"paginationGroupStyle": '',
-		"maxHeight": undefined,
-		"selectAllFiltered": 'Select all filtered',
-		"unselectAllFiltered": 'Unselect all filtered',
-		"noOfSelected": 'No. of selected: ',
-		"resetFilters": 'Reset filters',
-		"resetEdits": 'Reset edits',
-		"toBegining": '<<',
-		"previousPage": '<',
-		"nextPage": '>',
-		"toEnding": '>>',
-		"headersStyle": {
-			"border": "#aaa solid 1px",
-			"height": "calc(100% - 8px)",
-			"display": "flex",
-			"flex-flow": "column nowrap",
-			"padding": "3px",
-			"border-radius": "5px",
-			"margin": "1px",
-			"text-align": "left",
-			"font-weight": "bold",
-			"font-size": "12px",
-			"background-color": "#add"
-		},
-		"filtersStyle": {
-			"border": "#aaa solid 1px",
-			"padding": "3px",
-			"border-radius": "5px",
-			"margin": "1px",
-			"text-align": "center",
-			"font-size": "12px",
-			"width": "calc(100% - 2px)"
-		},
-		"rowsStyle": {
-			"text-align": "center",
-			"font-size": "12px"
-		},
-		"oddRowsStyle": {},
-		"evenRowsStyle": {
-			"background-color": "#f9f9f9"
-		}
-	};
+		};
+		this.tableSettings = JSON.parse(JSON.stringify(this.tableDefaultSettings));
+	}
 
-	let tableSettings = JSON.parse(JSON.stringify(tableDefaultSettings));
-
-	function toStyleString(obj) {
+	toStyleString(obj) {
 		try {
 			var output = '';
 			for (const [key, value] of Object.entries(obj)) {
@@ -86,44 +88,44 @@ function InteractiveTable(id) {
 		}
 	}
 
-	function setData(data) {
+	setData(data) {
 		try {
-			edited = false;
+			this.edited = false;
 			data.forEach((row, index) => {
 				row["row-index"] = index + 1;
 				row["row-filtered"] = true;
 				row["row-selected"] = false;
-				row["row-edited"] = false;
+				row["row-this.edited"] = false;
 			});
-			tableData = data;
-			sort("row-index", true);
+			this.tableData = data;
+			this.sort("row-index", true);
 			this.sortingBy = "row-index";
-			originalTableData = JSON.parse(JSON.stringify(data));
+			this.originalTableData = JSON.parse(JSON.stringify(data));
 			return this;
 		} catch (error) {
 			throw new Error("error caught @ setData(" + data + "): " + error);
 		}
 	}
 
-	function resetData(data) {
+	resetData(data) {
 		try {
-			edited = false;
-			tableData = JSON.parse(JSON.stringify(originalTableData));
+			this.edited = false;
+			this.tableData = JSON.parse(JSON.stringify(this.originalTableData));
 			return this;
 		} catch (error) {
 			throw new Error("error caught @ resetData(" + data + "): " + error);
 		}
 	}
 
-	function setTableSettings(newSettings) {
+	setTableSettings(newSettings) {
 		try {
-			tableSettings = { ...tableSettings, ...newSettings };
+			this.tableSettings = { ...this.tableSettings, ...newSettings };
 
-			tableSettings['headersStyle'] = { ...tableDefaultSettings['headersStyle'], ...newSettings['headersStyle'] };
-			tableSettings['filtersStyle'] = { ...tableDefaultSettings['filtersStyle'], ...newSettings['filtersStyle'] };
-			tableSettings['rowsStyle'] = { ...tableDefaultSettings['rowsStyle'], ...newSettings['rowsStyle'] };
-			tableSettings['oddRowsStyle'] = { ...tableDefaultSettings['oddRowsStyle'], ...newSettings['oddRowsStyle'] };
-			tableSettings['evenRowsStyle'] = { ...tableDefaultSettings['evenRowsStyle'], ...newSettings['evenRowsStyle'] };
+			this.tableSettings['headersStyle'] = { ...this.tableDefaultSettings['headersStyle'], ...newSettings['headersStyle'] };
+			this.tableSettings['filtersStyle'] = { ...this.tableDefaultSettings['filtersStyle'], ...newSettings['filtersStyle'] };
+			this.tableSettings['rowsStyle'] = { ...this.tableDefaultSettings['rowsStyle'], ...newSettings['rowsStyle'] };
+			this.tableSettings['oddRowsStyle'] = { ...this.tableDefaultSettings['oddRowsStyle'], ...newSettings['oddRowsStyle'] };
+			this.tableSettings['evenRowsStyle'] = { ...this.tableDefaultSettings['evenRowsStyle'], ...newSettings['evenRowsStyle'] };
 
 			return this;
 		} catch (error) {
@@ -131,45 +133,45 @@ function InteractiveTable(id) {
 		}
 	}
 
-	function printCheckBox(row) {
+	printCheckBox(row) {
 		try {
-			if (!haveSelection) {
-				haveSelection = true;
+			if (!this.haveSelection) {
+				this.haveSelection = true;
 			}
-			return '<input type="checkbox" onclick="' + identifier + (!tableSettings['multiSelect'] ? '.setAllSelected(false)' : '') + '.setSelected(' + row['row-index'] + ', this.checked).refreshTable();" ' + (row['row-selected'] ? 'checked' : '') + '/>';
+			return '<input type="checkbox" onclick="' + this.identifier + (!this.tableSettings['multiSelect'] ? '.setAllSelected(false)' : '') + '.setSelected(' + row['row-index'] + ', this.checked).refreshTable();" ' + (row['row-selected'] ? 'checked' : '') + '/>';
 		} catch (error) {
 			throw new Error("error caught @ printCheckBox(" + row + "): " + error);
 		}
 	}
 
-	function setSelected(index, selected) {
+	setSelected(index, selected) {
 		try {
-			tableData = tableData.map(row => row['row-index'] === index ? { ...row, 'row-selected': selected } : row)
+			this.tableData = this.tableData.map(row => row['row-index'] === index ? { ...row, 'row-selected': selected } : row)
 			return this;
 		} catch (error) {
 			throw new Error("error caught @ setSelected(" + index + ", " + selected + "): " + error);
 		}
 	}
 
-	function setAllSelected(selected) {
+	setAllSelected(selected) {
 		try {
-			tableData = tableData.map(row => ({ ...row, 'row-selected': selected }));
+			this.tableData = this.tableData.map(row => ({ ...row, 'row-selected': selected }));
 			return this;
 		} catch (error) {
 			throw new Error("error caught @ setAllSelected(" + selected + "): " + error);
 		}
 	}
 
-	function setAllFilteredSelected(selected) {
+	setAllFilteredSelected(selected) {
 		try {
-			tableData = tableData.map(row => row['row-filtered'] ? { ...row, 'row-selected': selected } : row);
+			this.tableData = this.tableData.map(row => row['row-filtered'] ? { ...row, 'row-selected': selected } : row);
 			return this;
 		} catch (error) {
 			throw new Error("error caught @ setAllFilteredSelected(" + selected + "): " + error);
 		}
 	}
 
-	function removeKey(arr, keys) {
+	removeKey(arr, keys) {
 		try {
 			let output = JSON.parse(JSON.stringify(arr));
 			if (typeof keys === 'string') {
@@ -211,7 +213,7 @@ function InteractiveTable(id) {
 		}
 	}
 
-	function deepFilter(arr, predicate) {
+	deepFilter(arr, predicate) {
 		try {
 			const filteredArr = [];
 			for (const obj of arr) {
@@ -225,21 +227,21 @@ function InteractiveTable(id) {
 		}
 	}
 
-	function setEdited() {
+	setEdited() {
 		try {
-			for (let i = 0; i < tableData.length; i++) {
-				const row = tableData[i];
-				const origRow = originalTableData.find(origRow => origRow['row-index'] === row['row-index']);
+			for (let i = 0; i < this.tableData.length; i++) {
+				const row = this.tableData[i];
+				const origRow = this.originalTableData.find(origDataRow => origDataRow['row-index'] === row['row-index']);
 				let isEdited = false;
 				for (const key in row) {
-					if (key !== 'row-index' && key !== 'row-filtered' && key !== 'row-selected' && key !== 'row-edited') {
+					if (key !== 'row-index' && key !== 'row-filtered' && key !== 'row-selected' && key !== 'row-this.edited') {
 						if (row[key] !== origRow[key]) {
 							isEdited = true;
 							break;
 						}
 					}
 				}
-				row['row-edited'] = isEdited;
+				row['row-this.edited'] = isEdited;
 			}
 			return this;
 		} catch (error) {
@@ -247,13 +249,13 @@ function InteractiveTable(id) {
 		}
 	}
 
-	function getSelected(clean = true) {
+	getSelected(clean = true) {
 		try {
-			let output = deepFilter(tableData, row => row['row-selected']);
+			let output = this.deepFilter(this.tableData, row => row['row-selected']);
 			if (!clean) {
 				return output;
 			} else {
-				output = removeKey(output, ['row-%']);
+				output = this.removeKey(output, ['row-%']);
 				return output;
 			}
 		} catch (error) {
@@ -261,13 +263,13 @@ function InteractiveTable(id) {
 		}
 	}
 
-	function getFiltered(clean = true) {
+	getFiltered(clean = true) {
 		try {
-			let output = deepFilter(tableData, row => row['row-filtered']);
+			let output = this.deepFilter(this.tableData, row => row['row-filtered']);
 			if (!clean) {
 				return output;
 			} else {
-				output = removeKey(output, ['row-%']);
+				output = this.removeKey(output, ['row-%']);
 				return output;
 			}
 		} catch (error) {
@@ -275,35 +277,36 @@ function InteractiveTable(id) {
 		}
 	}
 
-	function getEdited(clean = true) {
+	getEdited(clean = true) {
 		try {
-			const output = deepFilter(tableData, row => row['row-edited']);
+			const output = this.deepFilter(this.tableData, row => row['row-this.edited']);
 			if (!clean) {
 				return output;
 			} else {
-				removeKey(output, ['row-index', 'row-selected', 'row-filtered', 'row-edited']);
+				this.removeKey(output, ['row-index', 'row-selected', 'row-filtered', 'row-this.edited']);
 				return output;
 			}
 		} catch (error) {
-			throw new Error("error caught @ getEdited(): " + error.toString());
+			throw new Error("error caught @ getthis.edited(): " + error.toString());
 		}
 	}
 
-	function sortAsOriginal() {
+	sortAsOriginal() {
 		try {
-			tableData.sort((a, b) => a['row-index'] - b['row-index']);
+			this.tableData.sort((a, b) => a['row-index'] - b['row-index']);
 			return this;
 		} catch (error) {
 			throw new Error("error caught @ sortAsOriginal(): " + error);
 		}
 	}
-	function filterRows() {
+
+	filterRows() {
 		try {
-			const length = tableSettings['end'] - tableSettings['start'] + 1;
-			tableData.forEach((row) => {
+			const length = this.tableSettings['end'] - this.tableSettings['start'] + 1;
+			this.tableData.forEach((row) => {
 				let isFiltered = true;
-				for (const col of tableSettings['columns']) {
-					let matching = match(row[col['data']], (col['filter'] ? col['filter'] : ''), false);
+				for (const col of this.tableSettings['columns']) {
+					let matching = this.match((row[col['data']]||'').toString(), (col['filter'] ? col['filter'] : ''), false);
 					if (!matching) {
 						isFiltered = false;
 						break;
@@ -311,17 +314,17 @@ function InteractiveTable(id) {
 				}
 				row["row-filtered"] = isFiltered;
 			});
-			setStart(1);
-			setEnd(Math.max(length, tableSettings['defaultEnd']));
+			this.setStart(1);
+			this.setEnd(Math.max(length, this.tableSettings['defaultEnd']));
 			return this;
 		} catch (error) {
 			throw new Error("error caught @ filterRows(): " + error);
 		}
 	}
 
-	function sort(data, order = true) {
+	sort(data, order = true) {
 		try {
-			const sortedData = tableData.sort((a, b) => {
+			const sortedData = this.tableData.sort((a, b) => {
 				const aValue = a[data] || '';
 				const bValue = b[data] || '';
 				if (typeof aValue === 'boolean' || typeof bValue === 'boolean') {
@@ -332,19 +335,19 @@ function InteractiveTable(id) {
 					} else {
 						return order ? 1 : -1;
 					}
-				} else if (isDateString(aValue) && isDateString(bValue)) {
-					const aNumber = parseDate(aValue);
-					const bNumber = parseDate(bValue);
+				} else if (this.isDateString(aValue) && this.isDateString(bValue)) {
+					const aNumber = this.parseDate(aValue);
+					const bNumber = this.parseDate(bValue);
 					if (!isNaN(aNumber) && !isNaN(bNumber)) {
 						return order ? aNumber - bNumber : bNumber - aNumber;
 					}
-				} else if (isNumberString(aValue) && isNumberString(bValue)) {
+				} else if (this.isNumberString(aValue) && this.isNumberString(bValue)) {
 					const aNumber = parseFloat(aValue);
 					const bNumber = parseFloat(bValue);
 					if (!isNaN(aNumber) && !isNaN(bNumber)) {
 						return order ? aNumber - bNumber : bNumber - aNumber;
 					}
-				} else if (isIntegerString(aValue) && isIntegerString(bValue)) {
+				} else if (this.isIntegerString(aValue) && this.isIntegerString(bValue)) {
 					const aInteger = parseInt(aValue);
 					const bInteger = parseInt(bValue);
 					if (!isNaN(aInteger) && !isNaN(bInteger)) {
@@ -355,16 +358,16 @@ function InteractiveTable(id) {
 				}
 				return 0;
 			});
-			tableData = sortedData;
-			sortingBy = data;
-			ascending = order;
+			this.tableData = sortedData;
+			this.sortingBy = data;
+			this.ascending = order;
 			return this;
 		} catch (error) {
 			throw new Error("error caught @ sort(" + data + ", " + order + "): " + error);
 		}
 	}
 
-	function isDateString(value) {
+	isDateString(value) {
 		try {
 			return /^(\d{2})[-\/](\d{2})[-\/](\d{4})$|^(\d{4})[-\/](\d{2})[-\/](\d{2})$|^(\d{2})[-\/](\d{2})[-\/](\d{4}) (\d{2}):(\d{2}):(\d{2})$/.test(value);
 		} catch (error) {
@@ -372,7 +375,7 @@ function InteractiveTable(id) {
 		}
 	}
 
-	function isNumberString(value) {
+	isNumberString(value) {
 		try {
 			return /^(\d+|\d+\.\d+|\.\d+)$/.test(value);
 		} catch (error) {
@@ -380,7 +383,7 @@ function InteractiveTable(id) {
 		}
 	}
 
-	function isIntegerString(value) {
+	isIntegerString(value) {
 		try {
 			return /^(\d+)$/.test(value);
 		} catch (error) {
@@ -388,7 +391,7 @@ function InteractiveTable(id) {
 		}
 	}
 
-	function parseDate(value) {
+	parseDate(value) {
 		try {
 			let match = null;
 			let output = null;
@@ -414,11 +417,11 @@ function InteractiveTable(id) {
 		}
 	}
 
-	function setStart(start) {
+	setStart(start) {
 		try {
 			let rowNumber = parseInt(start);
 			if (!Number.isNaN(rowNumber)) {
-				tableSettings = { ...tableSettings, start: Math.max((getFiltered(false).length === 0 ? 0 : 1), Math.min(rowNumber, tableSettings['end']), tableSettings['end'] - tableSettings['maxRows'] + 1) };
+				this.tableSettings = { ...this.tableSettings, start: Math.max((this.getFiltered(false).length === 0 ? 0 : 1), Math.min(rowNumber, this.tableSettings['end']), this.tableSettings['end'] - this.tableSettings['maxRows'] + 1) };
 			}
 			return this;
 		} catch (err) {
@@ -426,11 +429,11 @@ function InteractiveTable(id) {
 		}
 	}
 
-	function setEnd(end) {
+	setEnd(end) {
 		try {
 			let rowNumber = parseInt(end);
 			if (!Number.isNaN(rowNumber)) {
-				tableSettings = { ...tableSettings, end: Math.min(Math.max(rowNumber, tableSettings['start']), getFiltered(false).length, tableSettings['start'] + tableSettings['maxRows'] - 1) };
+				this.tableSettings = { ...this.tableSettings, end: Math.min(Math.max(rowNumber, this.tableSettings['start']), this.getFiltered(false).length, this.tableSettings['start'] + this.tableSettings['maxRows'] - 1) };
 			}
 			return this;
 		} catch (err) {
@@ -438,58 +441,58 @@ function InteractiveTable(id) {
 		}
 	}
 
-	function toBegining() {
+	toBegining() {
 		try {
-			const length = tableSettings['end'] - tableSettings['start'] + 1;
-			tableSettings['start'] = this.getFiltered(false).length === 0 ? 0 : 1;
-			tableSettings['end'] = Math.min(this.getFiltered(false).length, tableSettings['start'] + length - 1);
+			const length = this.tableSettings['end'] - this.tableSettings['start'] + 1;
+			this.tableSettings['start'] = this.getFiltered(false).length === 0 ? 0 : 1;
+			this.tableSettings['end'] = Math.min(this.getFiltered(false).length, this.tableSettings['start'] + length - 1);
+			return this;
+		} catch (err) {
+			throw new Error("error caught @ toBegining() - " + err);
+		}
+	}
+
+	priviousPage() {
+		try {
+			const length = this.tableSettings['end'] - this.tableSettings['start'] + 1;
+			this.tableSettings['start'] = Math.max(this.getFiltered(false).length === 0 ? 0 : 1, this.tableSettings['start'] - length);
+			this.tableSettings['end'] = Math.min(this.tableData.length, this.tableSettings['start'] + length - 1);
 			return this;
 		} catch (err) {
 			throw new Error("error caught @ priviousPage() - " + err);
 		}
 	}
 
-	function priviousPage() {
+	nextPage() {
 		try {
-			const length = tableSettings['end'] - tableSettings['start'] + 1;
-			tableSettings['start'] = Math.max(this.getFiltered(false).length === 0 ? 0 : 1, tableSettings['start'] - length);
-			tableSettings['end'] = Math.min(tableData.length, tableSettings['start'] + length - 1);
-			return this;
-		} catch (err) {
-			throw new Error("error caught @ priviousPage() - " + err);
-		}
-	}
-
-	function nextPage() {
-		try {
-			const length = tableSettings['end'] - tableSettings['start'] + 1;
-			tableSettings['end'] = Math.min(getFiltered(false).length, tableSettings['end'] + length);
-			tableSettings['start'] = Math.max(1, tableSettings['end'] - length + 1);
+			const length = this.tableSettings['end'] - this.tableSettings['start'] + 1;
+			this.tableSettings['end'] = Math.min(this.getFiltered(false).length, this.tableSettings['end'] + length);
+			this.tableSettings['start'] = Math.max(1, this.tableSettings['end'] - length + 1);
 			return this;
 		} catch (err) {
 			throw new Error("error caught @ nextPage() - " + err);
 		}
 	}
 
-	function toEnding() {
+	toEnding() {
 		try {
-			const length = tableSettings['end'] - tableSettings['start'] + 1;
-			tableSettings['end'] = getFiltered(false).length;
-			tableSettings['start'] = Math.max(1, tableSettings['end'] - length + 1);
+			const length = this.tableSettings['end'] - this.tableSettings['start'] + 1;
+			this.tableSettings['end'] = this.getFiltered(false).length;
+			this.tableSettings['start'] = Math.max(1, this.tableSettings['end'] - length + 1);
 			return this;
 		} catch (err) {
 			throw new Error("error caught @ priviousPage() - " + err);
 		}
 	}
 
-	function printSelectingGroup() {
+	printSelectingGroup() {
 		try {
-			if (tableSettings['multiSelect'] == true && haveSelection) {
-				const selectedRows = tableData.filter(row => row['row-selected']);
+			if (this.tableSettings['multiSelect'] == true && this.haveSelection) {
+				const selectedRows = this.tableData.filter(row => row['row-selected']);
 				const noOfSelected = selectedRows.length;
-				const selectAllButton = '<button class="' + tableSettings['buttonClass'] + '" onclick="' + identifier + '.setAllFilteredSelected(true).refreshTable()">' + tableSettings.selectAllFiltered + '</button>';
-				const unselectAllButton = '<button class="' + tableSettings['buttonClass'] + '" onclick="' + identifier + '.setAllFilteredSelected(false).refreshTable()">' + tableSettings.unselectAllFiltered + '</button>';
-				return '<div style="display:flex;flex-flow:row wrap;justify-content:flex-start;align-items:center;column-gap:3px;">' + tableSettings.noOfSelected + noOfSelected + ' <div style="display:flex;flex-flow:row wrap;justify-content:flex-start;align-items:center;column-gap:3px;">' + selectAllButton + unselectAllButton + '</div></div>';
+				const selectAllButton = '<button class="' + this.tableSettings['buttonClass'] + '" onclick="' + this.identifier + '.setAllFilteredSelected(true).refreshTable()">' + this.tableSettings.selectAllFiltered + '</button>';
+				const unselectAllButton = '<button class="' + this.tableSettings['buttonClass'] + '" onclick="' + this.identifier + '.setAllFilteredSelected(false).refreshTable()">' + this.tableSettings.unselectAllFiltered + '</button>';
+				return '<div style="display:flex;flex-flow:row wrap;justify-content:flex-start;align-items:center;column-gap:3px;">' + this.tableSettings.noOfSelected + noOfSelected + ' <div style="display:flex;flex-flow:row wrap;justify-content:flex-start;align-items:center;column-gap:3px;">' + selectAllButton + unselectAllButton + '</div></div>';
 			} else {
 				return '';
 			}
@@ -498,65 +501,65 @@ function InteractiveTable(id) {
 		}
 	}
 
-	function printResetFiltersButton() {
+	printResetFiltersButton() {
 		try {
-			return resetFiltersButton = '<button class="' + tableSettings['buttonClass'] + '" onclick="' + identifier + '.resetFilters().filterRows().refreshTable();">' + tableSettings.resetFilters + '</button>';
+			return '<button class="' + this.tableSettings['buttonClass'] + '" onclick="' + this.identifier + '.resetFilters().filterRows().refreshTable();">' + this.tableSettings.resetFilters + '</button>';
 		} catch (err) {
 			throw new Error("error caught @ printResetFiltersButton() - " + err);
 		}
 	}
 
-	function printResetEditsButton() {
+	printResetEditsButton() {
 		try {
-			return edited ? resetDataButton = '<button class="' + tableSettings['buttonClass'] + '" onclick="' + identifier + '.resetData().filterRows().refreshTable();">' + tableSettings.resetEdits + '</button>' : '';
+			return this.edited ? '<button class="' + this.tableSettings['buttonClass'] + '" onclick="' + this.identifier + '.resetData().filterRows().refreshTable();">' + this.tableSettings.resetEdits + '</button>' : '';
 		} catch (err) {
 			throw new Error("error caught @ printResetEditsButton() - " + err);
 		}
 	}
 
-	function printPaginationGroup() {
+	printPaginationGroup() {
 		try {
-			setStart(tableSettings['start']);
-			setEnd(tableSettings['end']);
-			const startInput = '<input type="text" style=\'text-align:center; padding: 3px 8px; width: ' + (Math.max(1, Math.ceil(Math.log10(tableData.length))) * 8 + 20) + 'px;\' value="' + tableSettings['start'] + '" onchange="' + identifier + '.setStart(this.value).refreshTable()" />';
-			const endInput = '<input type="text" style=\'text-align:center; padding: 3px 8px; width: ' + (Math.max(1, Math.ceil(Math.log10(tableData.length))) * 8 + 20) + 'px;\' value="' + tableSettings['end'] + '" onchange="' + identifier + '.setEnd(this.value).refreshTable()" />';
-			const totalRows = getFiltered(false).length;
-			const toBeginingButton = '<button class="' + tableSettings['buttonClass'] + '" onclick="' + identifier + '.toBegining().refreshTable();">' + tableSettings['toBegining'] + '</button>';
-			const previousButton = '<button style="margin-left:5px;" class="' + tableSettings['buttonClass'] + '" onclick="' + identifier + '.priviousPage().refreshTable();">' + tableSettings['previousPage'] + '</button>';
-			const nextButton = '<button style="margin-right:5px;" class="' + tableSettings['buttonClass'] + '" onclick="' + identifier + '.nextPage().refreshTable();">' + tableSettings['nextPage'] + '</button>';
-			const toEndingButton = '<button class="' + tableSettings['buttonClass'] + '" onclick="' + identifier + '.toEnding().refreshTable();">' + tableSettings['toEnding'] + '</button>';
-			return '<div style="' + tableSettings['paginationGroupStyle'] + '"><div style="width:100%;display:flex;flex-flow:row wrap;justify-content:center;align-items:center;column-gap:3px;"><div>' + toBeginingButton + previousButton + '</div><div>' + startInput + '<span style=\'margin: 0px 5px;\'>-</span>' + endInput + '<span style=\'margin: 0px 5px;\'>/</span>' + totalRows + '</div><div>' + nextButton + toEndingButton + '</div></div></div>';
+			this.setStart(this.tableSettings['start']);
+			this.setEnd(this.tableSettings['end']);
+			const startInput = '<input type="text" style=\'text-align:center; padding: 3px 8px; width: ' + (Math.max(1, Math.ceil(Math.log10(this.tableData.length))) * 8 + 20) + 'px;\' value="' + this.tableSettings['start'] + '" onchange="' + this.identifier + '.setStart(this.value).refreshTable()" />';
+			const endInput = '<input type="text" style=\'text-align:center; padding: 3px 8px; width: ' + (Math.max(1, Math.ceil(Math.log10(this.tableData.length))) * 8 + 20) + 'px;\' value="' + this.tableSettings['end'] + '" onchange="' + this.identifier + '.setEnd(this.value).refreshTable()" />';
+			const totalRows = this.getFiltered(false).length;
+			const toBeginingButton = '<button class="' + this.tableSettings['buttonClass'] + '" onclick="' + this.identifier + '.toBegining().refreshTable();">' + this.tableSettings['toBegining'] + '</button>';
+			const previousButton = '<button style="margin-left:5px;" class="' + this.tableSettings['buttonClass'] + '" onclick="' + this.identifier + '.priviousPage().refreshTable();">' + this.tableSettings['previousPage'] + '</button>';
+			const nextButton = '<button style="margin-right:5px;" class="' + this.tableSettings['buttonClass'] + '" onclick="' + this.identifier + '.nextPage().refreshTable();">' + this.tableSettings['nextPage'] + '</button>';
+			const toEndingButton = '<button class="' + this.tableSettings['buttonClass'] + '" onclick="' + this.identifier + '.toEnding().refreshTable();">' + this.tableSettings['toEnding'] + '</button>';
+			return '<div style="' + this.tableSettings['paginationGroupStyle'] + '"><div style="width:100%;display:flex;flex-flow:row wrap;justify-content:center;align-items:center;column-gap:3px;"><div>' + toBeginingButton + previousButton + '</div><div>' + startInput + '<span style=\'margin: 0px 5px;\'>-</span>' + endInput + '<span style=\'margin: 0px 5px;\'>/</span>' + totalRows + '</div><div>' + nextButton + toEndingButton + '</div></div></div>';
 		} catch (err) {
 			throw new Error("error caught @ printPaginationGroup() - " + err);
 		}
 	}
 
-	function setFilter(index, value) {
+	setFilter(index, value) {
 		try {
-			tableSettings['columns'][index]['filter'] = value;
-			tableSettings['start'] = 1;
-			setEnd(Math.max(length, tableSettings['defaultEnd']));
+			this.tableSettings['columns'][index]['filter'] = value;
+			this.tableSettings['start'] = 1;
+			this.setEnd(Math.max(length, this.tableSettings['defaultEnd']));
 			return this;
 		} catch (err) {
 			throw new Error("error caught @ setFilter(" + index + ", " + value + ") - " + err);
 		}
 	}
 
-	function resetFilters() {
+	resetFilters() {
 		try {
-			const length = tableSettings['end'] - tableSettings['start'] + 1;
-			tableSettings['columns'].forEach(function (col) {
+			const length = this.tableSettings['end'] - this.tableSettings['start'] + 1;
+			this.tableSettings['columns'].forEach((col) => {
 				col['filter'] = "";
 			});
-			tableSettings['start'] = 1;
-			setEnd(Math.max(length, tableSettings['defaultEnd']));
+			this.tableSettings['start'] = 1;
+			this.setEnd(Math.max(length, this.tableSettings['defaultEnd']));
 			return this;
 		} catch (err) {
 			throw new Error("error caught @ resetFilters() - " + err);
 		}
 	}
 
-	function match(text, matchingText, caseSensitive) {
+	match(text, matchingText, caseSensitive) {
 		let match = false;
 
 		try {
@@ -637,74 +640,77 @@ function InteractiveTable(id) {
 		return match;
 	}
 
-	function editData(index, data, value) {
+	editData(index, data, value) {
 		try {
-			edited = true;
-			let row = tableData.find((row) => {
+			this.edited = true;
+			let row = this.tableData.find((row) => {
 				return row['row-index'] === index;
 			});
 			if (row['ori-' + data] === undefined) {
 				row['ori-' + data] = row[data];
 			}
 			row[data] = value;
-			refreshTable();
+			this.refreshTable();
 			return this;
 		} catch (err) {
 			throw new Error("error caught @ editData(" + index + ", " + data + ", " + value + "): " + err);
 		}
 	}
 
-	function stringToAscii(str) {
-		let ascii = "";
-		for (let i = 0; i < str.length; i++) {
-			let charCode = str.charCodeAt(i);
-			ascii += "&#" + charCode + ";";
+	stringToAscii(str) {
+		try {
+			let ascii = "";
+			for (let i = 0; i < str.length; i++) {
+				let charCode = str.charCodeAt(i);
+				ascii += "&#" + charCode + ";";
+			}
+			return ascii;
+		} catch (err) {
+			throw new Error("error caught @ stringToAscii(" + str + "): " + err);
 		}
-		return ascii;
 	}
 
-	function printTable() {
+	printTable() {
 		try {
 			var html = "";
 
 			/*headers*/
 			html += "<table style='width:100%;height:min-content;'><thead><tr>";
-			tableSettings['columns'].forEach(function (col) {
-				var headerStyle = toStyleString({ ...(tableSettings['headersStyle'] || {}), ...(col['headerStyle'] || {}) });
-				var headerHtml = '<div style="' + headerStyle + '" class="sort-header ' + (sortingBy === col['data'] ? 'sorting' : '') + '" onclick="' + identifier + '.sort(\'' + col['data'] + '\', ' + (sortingBy !== col['data'] || !ascending) + ').refreshTable()"><div style="flex:1;height:0px;"></div>' + col.header + (sortingBy === col['data'] ? (ascending ? '&#9650;' : '&#9660;') : '') + '<div style="flex:1;"></div></div>';
+			this.tableSettings['columns'].forEach((col) => {
+				var headerStyle = this.toStyleString({ ...(this.tableSettings['headersStyle'] || {}), ...(col['headerStyle'] || {}) });
+				var headerHtml = '<div style="' + headerStyle + '" class="sort-header ' + (this.sortingBy === col['data'] ? 'sorting' : '') + '" onclick="' + this.identifier + '.sort(\'' + col['data'] + '\', ' + (this.sortingBy !== col['data'] || !this.ascending) + ').refreshTable()"><div style="flex:1;height:0px;"></div>' + col.header + (this.sortingBy === col['data'] ? (this.ascending ? '&#9650;' : '&#9660;') : '') + '<div style="flex:1;"></div></div>';
 				html += '<td style="padding:0px;">' + headerHtml + '</td>';
 			});
 			html += '</tr>';
 
 			/*filters*/
 			html += '<tr>';
-			tableSettings['columns'].forEach(function (col) {
-				var filterStyle = toStyleString({ ...(tableSettings['filtersStyle'] || {}), ...(col['filterStyle'] || {}) });
+			this.tableSettings['columns'].forEach((col) => {
+				var filterStyle = this.toStyleString({ ...(this.tableSettings['filtersStyle'] || {}), ...(col['filterStyle'] || {}) });
 				var filterValue = col['filter'] || '';
 				var filterPlaceholder = col['filterPlaceholder'] || '';
-				html += '<td style="padding:0px;"><input style="' + filterStyle + '" class="filtering-input" type="text" style="width:100%;" value="' + stringToAscii(filterValue) + '" onchange="' + identifier + '.setFilter(' + tableSettings['columns'].indexOf(col) + ',this.value).filterRows().refreshTable();" placeholder="' + filterPlaceholder + '" /></td>';
+				html += '<td style="padding:0px;"><input style="' + filterStyle + '" class="filtering-input" type="text" style="width:100%;" value="' + this.stringToAscii(filterValue) + '" onchange="' + this.identifier + '.setFilter(' + this.tableSettings['columns'].indexOf(col) + ',this.value).filterRows().refreshTable();" placeholder="' + filterPlaceholder + '" /></td>';
 			});
 			html += '</tr></head><tbody>';
 
 			/*rows*/
-			var start = tableSettings['start'];
-			var end = tableSettings['end'];
-			var filteredData = getFiltered(false).slice(start - 1, end);
-			filteredData.forEach(function (row, index) {
-				var rowsStyle = function (col) {
-					return toStyleString({ ...(tableSettings.rowsStyle || ''), ...(col.rowsStyle || '') });
+			var start = this.tableSettings['start'];
+			var end = this.tableSettings['end'];
+			var filteredData = this.getFiltered(false).slice(start - 1, end);
+			filteredData.forEach((row, index) => {
+				var rowsStyle = (col) => {
+					return this.toStyleString({ ...(this.tableSettings.rowsStyle || ''), ...(col.rowsStyle || '') });
 				};
-				var oddEvenRowsStyle = function (col) {
-					return toStyleString((index % 2 === 1 ? tableSettings.evenRowsStyle : tableSettings.oddRowsStyle));
+				var oddEvenRowsStyle = (col) => {
+					return this.toStyleString((index % 2 === 1 ? this.tableSettings.evenRowsStyle : this.tableSettings.oddRowsStyle));
 				};
 				html += '<tr>';
-				tableSettings['columns'].forEach(function (col) {
+				this.tableSettings['columns'].forEach((col) => {
 					var cellData = row[col['data']] !== null ? row[col['data']] : '';
 					if (col.modifier) {
-						var modifier = eval(col.modifier);
-						if (typeof modifier === 'function') {
+						if (typeof col.modifier === 'function') {
 							var clone = Object.assign({}, row);
-							cellData = modifier(clone);
+							cellData = col.modifier(clone);
 						}
 					}
 					html += '<td style="' + oddEvenRowsStyle(col) + rowsStyle(col) + '">' + cellData + '</td>';
@@ -716,18 +722,18 @@ function InteractiveTable(id) {
 
 			html = "<div style='position:relative;width:100%;display:flex;flex-flow:column nowrap;justify-content:flex-start;align-items:center;row-gap:3px;'>"
 				+ "<div style='width:100%;display:flex;flex-flow:row wrap;justify-content:flex-start;align-items:center;column-gap:3px;'>"
-				+ "<div>" + tableSettings['label'] + "</div>"
+				+ "<div>" + this.tableSettings['label'] + "</div>"
 				+ "<div style='flex:1;'></div>"
-				+ "<div style='" + tableSettings['actionsGroupStyle'] + "'>"
+				+ "<div style='" + this.tableSettings['actionsGroupStyle'] + "'>"
 				+ "<div style='display:flex;flex-flow:row wrap;justify-content:flex-start;align-items:center;column-gap:3px;'>"
-				+ printSelectingGroup()
-				+ printResetFiltersButton()
-				+ printResetEditsButton()
+				+ this.printSelectingGroup()
+				+ this.printResetFiltersButton()
+				+ this.printResetEditsButton()
 				+ "</div>"
 				+ "</div>"
 				+ "</div>"
-				+ "<div style='width:100%;overflow:auto;" + (tableSettings['maxHeight'] ? " max-height:" + tableSettings['maxHeight'] + ";" : "") + " overflow:auto;'>" + html + "</div>"
-				+ printPaginationGroup()
+				+ "<div style='width:100%;overflow:auto;" + (this.tableSettings['maxHeight'] ? " max-height:" + this.tableSettings['maxHeight'] + ";" : "") + " overflow:auto;'>" + html + "</div>"
+				+ this.printPaginationGroup()
 				+ '</div>\n';
 
 			return html;
@@ -736,22 +742,22 @@ function InteractiveTable(id) {
 		}
 	}
 
-	function fillTable(id) {
+	fillTable(id) {
 		try {
 			if (document.getElementById(id) !== null) {
-				document.getElementById(id).innerHTML = printTable();
+				document.getElementById(id).innerHTML = this.printTable();
 			}
-			container = id;
+			this.container = id;
 			return this;
 		} catch (err) {
 			throw new Error("error caught @ fillTable(" + id + "): " + err);
 		}
 	}
 
-	function refreshTable() {
+	refreshTable() {
 		try {
-			if (document.getElementById(container) !== null) {
-				document.getElementById(container).innerHTML = printTable();
+			if (document.getElementById(this.container) !== null) {
+				document.getElementById(this.container).innerHTML = this.printTable();
 			}
 			return this;
 		} catch (err) {
@@ -759,35 +765,4 @@ function InteractiveTable(id) {
 		}
 	}
 
-	return {
-		setData,
-		resetData,
-		setTableSettings,
-		printCheckBox,
-		setSelected,
-		setAllSelected,
-		setAllFilteredSelected,
-		getSelected,
-		getFiltered,
-		setEdited,
-		getEdited,
-		sortAsOriginal,
-		sort,
-		printSelectingGroup,
-		setStart,
-		setEnd,
-		toBegining,
-		priviousPage,
-		nextPage,
-		toEnding,
-		printResetFiltersButton,
-		setFilter,
-		resetFilters,
-		filterRows,
-		printPaginationGroup,
-		editData,
-		printTable,
-		fillTable,
-		refreshTable
-	};
 }
