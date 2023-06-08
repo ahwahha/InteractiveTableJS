@@ -9,9 +9,9 @@
 	<div id="container"></div>
 
 	<br>
-	<button onclick="alert(JSON.stringify(myTable.getSelected()));">get selected</button>
-	<button onclick="alert(JSON.stringify(myTable.getFiltered()));">get filtered</button>
-	<button onclick="alert(JSON.stringify(myTable.setEdited().getEdited()));">get edited</button>
+	<button class='button' onclick="alert(JSON.stringify(myTable.getSelected()));">get selected</button>
+	<button class='button' onclick="alert(JSON.stringify(myTable.getFiltered()));">get filtered</button>
+	<button class='button' onclick="alert(JSON.stringify(myTable.setEdited().getEdited()));">get edited</button>
 
 	<style>
 		#container {
@@ -21,6 +21,33 @@
 
 		#container table {
 			border-collapse: collapse;
+		}
+
+		.button {
+			margin: 3px;
+			border: 1px solid #AAAAAA;
+			box-shadow: #444444 1px 1px 2px;
+			border-radius: 4px;
+			padding: 2px 10px 2px 10px;
+			text-decoration: none;
+			display: inline-block;
+			text-shadow: 0px 0px 0px #000000;
+			color: #000000;
+			background-color: #FFFFFF;
+			background-image: linear-gradient(to bottom, #cccccc, #e8e8e8, #f8f8f8, #ffffff, #f8f8f8, #e8e8e8, #cccccc);
+			outline: none;
+		}
+
+		.button:hover {
+			box-shadow: #555555 2px 2px 3px;
+			border: 1px solid #999999;
+		}
+
+		.button:active {
+			border: 1px solid #666666;
+			box-shadow: #aaaaaa 0px 0px 0px;
+			background-image: linear-gradient(to bottom, #999999, #d8d8d8, #e8e8e8, #eeeeee, #e8e8e8, #d8d8d8, #999999);
+			outline: none;
 		}
 	</style>
 	<script>
