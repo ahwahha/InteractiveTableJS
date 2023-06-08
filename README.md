@@ -18,7 +18,7 @@ There should be one property in tableSettings with key 'columns' which is an arr
 `'header'` to be the tag shown in the header row<br>
 `'data'` to be the property key of the row value to be shown<br>
 These properties may optionally contain one with key 'modifier' valued as a Function like below to replace what is orginally to be shown<br>
-`new Function('row', 'return "whatever html you want to be shown"')`<br>
+`new Function('row', 'return "whatever html you want to be shown";')`<br>
 or `(row)=>{return 'whatever html you want to be shown';}`<br>
 or any predefined function which accept the data row.<br>
 inside what you return, you may put: <br>
