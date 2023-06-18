@@ -177,7 +177,6 @@ InteractiveTable.prototype.setAllFilteredSelected = function (selected) {
  */
 InteractiveTable.prototype.cleanKeys = function (arr) {
 	try {
-		arr = (arr || this.tableData);
 		output = this.removeKeys(arr, ['row-%']);
 		return output;
 	} catch (error) {
@@ -272,7 +271,7 @@ InteractiveTable.prototype.setEdited = function (arr) {
 
 InteractiveTable.prototype.getData = function () {
 	try {
-		return this.TableData;
+		return JSON.parse(JSON.stringify(this.TableData));
 	} catch (error) {
 		throw new Error("error caught @ getData(): " + error.toString());
 	}
