@@ -178,10 +178,10 @@ InteractiveTable.prototype.setAllFilteredSelected = function (selected) {
 InteractiveTable.prototype.cleanKeys = function (arr) {
 	try {
 		arr = (arr || this.tableData);
-		output = this.removeKey(arr, ['row-%']);
+		output = this.removeKeys(arr, ['row-%']);
 		return output;
 	} catch (error) {
-		throw new Error("error caught @ removeKey(" + JSON.stringify(arr) + ", " + JSON.stringify(keys) + "): " + error.toString());
+		throw new Error("error caught @ removeKeys(" + JSON.stringify(arr) + ", " + JSON.stringify(keys) + "): " + error.toString());
 	}
 }
 
@@ -191,7 +191,7 @@ InteractiveTable.prototype.cleanKeys = function (arr) {
  * @param {*} keys [String] or [String][]
  * @returns 
  */
-InteractiveTable.prototype.removeKey = function (arr, keys) {
+InteractiveTable.prototype.removeKeys = function (arr, keys) {
 	try {
 		let output = JSON.parse(JSON.stringify(arr));
 		if (typeof keys === 'string') {
@@ -229,7 +229,7 @@ InteractiveTable.prototype.removeKey = function (arr, keys) {
 		}
 		return output;
 	} catch (error) {
-		throw new Error("error caught @ removeKey(" + JSON.stringify(arr) + ", " + JSON.stringify(keys) + "): " + error.toString());
+		throw new Error("error caught @ removeKeys(" + JSON.stringify(arr) + ", " + JSON.stringify(keys) + "): " + error.toString());
 	}
 }
 
