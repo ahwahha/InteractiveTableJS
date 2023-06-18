@@ -108,6 +108,12 @@ You get the subset of the table's data of currently selected/filtered/edited by 
 `.getFiltered()`<br>
 `.getEdited()`<br>
 <br>
+or by passing one into another like `.getFiltered(getSelected())`<br>
+The result of above methoes contain some extra properties of keys in each table row for keeping the table works.<br>
+To remove these properties, just pass the array into the method `cleanKeys()`<br>
+To remove specific properties in each row, you can pass the array into `removeKeys(arr,keys)`<br>
+where `arr` is you array and `keys` to be the property key or an array of property keys you wish to remove<br>
+<br>
 Oh if you wish not allowing multiple rows to be able to be selected<br>
 change that `"multiSelect"` property as false.<br>
 <br>
