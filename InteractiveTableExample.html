@@ -9,10 +9,13 @@
 	<div id="container"></div>
 
 	<br>
-	<button class='button' onclick="alert(JSON.stringify(myTable.getSelected()));">get selected</button>
-	<button class='button' onclick="alert(JSON.stringify(myTable.getFiltered()));">get filtered</button>
-	<button class='button' onclick="alert(JSON.stringify(myTable.setEdited().getEdited()));">get edited</button>
-
+	<button class='button' onclick="alert(JSON.stringify(myTable.cleanKeys(myTable.getSelected())));">get selected</button>
+	<button class='button' onclick="alert(JSON.stringify(myTable.cleanKeys(myTable.getFiltered())));">get filtered</button>
+	<button class='button' onclick="alert(JSON.stringify(myTable.cleanKeys(myTable.getEdited())));">get edited</button>
+	<br>
+	<button class='button' onclick="alert(JSON.stringify(myTable.cleanKeys(myTable.getSelected(myTable.getFiltered()))));">get selected filtered</button>
+	<button class='button' onclick="alert(JSON.stringify(myTable.cleanKeys(myTable.getSelected(myTable.getEdited()))));">get selected edited</button>
+	<button class='button' onclick="alert(JSON.stringify(myTable.cleanKeys(myTable.getFiltered(myTable.getEdited()))));">get filtered edited</button>
 	<style>
 		#container {
 			border: #ddd solid 1px;

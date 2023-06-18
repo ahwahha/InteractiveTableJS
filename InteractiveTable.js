@@ -94,7 +94,7 @@ InteractiveTable.prototype.setData = function (data) {
 			row["row-index"] = index + 1;
 			row["row-filtered"] = true;
 			row["row-selected"] = false;
-			row["row-this.edited"] = false;
+			row["row-edited"] = false;
 		});
 		this.tableData = data;
 		this.sort("row-index", true);
@@ -170,6 +170,27 @@ InteractiveTable.prototype.setAllFilteredSelected = function (selected) {
 	}
 }
 
+/**
+ * remove all properties with keys starting with 'row-' from input array
+ * @param {*} arr array of objects
+ * @returns 
+ */
+InteractiveTable.prototype.cleanKeys = function (arr) {
+	try {
+		arr = (arr || this.tableData);
+		output = this.removeKey(arr, ['row-%']);
+		return output;
+	} catch (error) {
+		throw new Error("error caught @ removeKey(" + JSON.stringify(arr) + ", " + JSON.stringify(keys) + "): " + error.toString());
+	}
+}
+
+/**
+ * remove all properties with keys specified in the parameter 'keys' from input array 'arr'
+ * @param {*} arr array of objects
+ * @param {*} keys [String] or [String][]
+ * @returns 
+ */
 InteractiveTable.prototype.removeKey = function (arr, keys) {
 	try {
 		let output = JSON.parse(JSON.stringify(arr));
@@ -226,21 +247,22 @@ InteractiveTable.prototype.deepFilter = function (arr, predicate) {
 	}
 }
 
-InteractiveTable.prototype.setEdited = function () {
+InteractiveTable.prototype.setEdited = function (arr) {
 	try {
-		for (let i = 0; i < this.tableData.length; i++) {
-			const row = this.tableData[i];
+		arr = (arr || this.tableData);
+		for (let i = 0; i < arr.length; i++) {
+			const row = arr[i];
 			const origRow = this.originalTableData.find(origDataRow => origDataRow['row-index'] === row['row-index']);
 			let isEdited = false;
 			for (const key in row) {
-				if (key !== 'row-index' && key !== 'row-filtered' && key !== 'row-selected' && key !== 'row-this.edited') {
+				if (!key.startsWith('row-')) {
 					if (row[key] !== origRow[key]) {
 						isEdited = true;
 						break;
 					}
 				}
 			}
-			row['row-this.edited'] = isEdited;
+			row['row-edited'] = isEdited;
 		}
 		return this;
 	} catch (error) {
@@ -248,45 +270,42 @@ InteractiveTable.prototype.setEdited = function () {
 	}
 }
 
-InteractiveTable.prototype.getSelected = function (clean = true) {
+InteractiveTable.prototype.getData = function () {
 	try {
-		let output = this.deepFilter(this.tableData, row => row['row-selected']);
-		if (!clean) {
-			return output;
-		} else {
-			output = this.removeKey(output, ['row-%']);
-			return output;
-		}
+		return this.TableData;
+	} catch (error) {
+		throw new Error("error caught @ getData(): " + error.toString());
+	}
+}
+
+InteractiveTable.prototype.getSelected = function (arr) {
+	try {
+		arr = (arr || this.tableData);
+		let output = this.deepFilter(arr, row => row['row-selected']);
+		return output;
 	} catch (error) {
 		throw new Error("error caught @ getSelected(): " + error.toString());
 	}
 }
 
-InteractiveTable.prototype.getFiltered = function (clean = true) {
+InteractiveTable.prototype.getFiltered = function (arr) {
 	try {
-		let output = this.deepFilter(this.tableData, row => row['row-filtered']);
-		if (!clean) {
-			return output;
-		} else {
-			output = this.removeKey(output, ['row-%']);
-			return output;
-		}
+		arr = (arr || this.tableData);
+		let output = this.deepFilter(arr, row => row['row-filtered']);
+		return output;
 	} catch (error) {
 		throw new Error("error caught @ getFiltered(): " + error.toString());
 	}
 }
 
-InteractiveTable.prototype.getEdited = function (clean = true) {
+InteractiveTable.prototype.getEdited = function (arr) {
 	try {
-		const output = this.deepFilter(this.tableData, row => row['row-this.edited']);
-		if (!clean) {
-			return output;
-		} else {
-			this.removeKey(output, ['row-index', 'row-selected', 'row-filtered', 'row-this.edited']);
-			return output;
-		}
+		arr = (arr || this.tableData);
+		this.setEdited(arr);
+		const output = this.deepFilter(arr, row => row['row-edited']);
+		return output;
 	} catch (error) {
-		throw new Error("error caught @ getthis.edited(): " + error.toString());
+		throw new Error("error caught @ getedited(): " + error.toString());
 	}
 }
 
@@ -420,7 +439,7 @@ InteractiveTable.prototype.setStart = function (start) {
 	try {
 		let rowNumber = parseInt(start);
 		if (!Number.isNaN(rowNumber)) {
-			this.tableSettings = { ...this.tableSettings, start: Math.max((this.getFiltered(false).length === 0 ? 0 : 1), Math.min(rowNumber, this.tableSettings['end']), this.tableSettings['end'] - this.tableSettings['maxRows'] + 1) };
+			this.tableSettings = { ...this.tableSettings, start: Math.max((this.getFiltered().length === 0 ? 0 : 1), Math.min(rowNumber, this.tableSettings['end']), this.tableSettings['end'] - this.tableSettings['maxRows'] + 1) };
 		}
 		return this;
 	} catch (err) {
@@ -432,7 +451,7 @@ InteractiveTable.prototype.setEnd = function (end) {
 	try {
 		let rowNumber = parseInt(end);
 		if (!Number.isNaN(rowNumber)) {
-			this.tableSettings = { ...this.tableSettings, end: Math.min(Math.max(rowNumber, this.tableSettings['start']), this.getFiltered(false).length, this.tableSettings['start'] + this.tableSettings['maxRows'] - 1) };
+			this.tableSettings = { ...this.tableSettings, end: Math.min(Math.max(rowNumber, this.tableSettings['start']), this.getFiltered().length, this.tableSettings['start'] + this.tableSettings['maxRows'] - 1) };
 		}
 		return this;
 	} catch (err) {
@@ -443,8 +462,8 @@ InteractiveTable.prototype.setEnd = function (end) {
 InteractiveTable.prototype.toBegining = function () {
 	try {
 		const length = this.tableSettings['end'] - this.tableSettings['start'] + 1;
-		this.tableSettings['start'] = this.getFiltered(false).length === 0 ? 0 : 1;
-		this.tableSettings['end'] = Math.min(this.getFiltered(false).length, this.tableSettings['start'] + length - 1);
+		this.tableSettings['start'] = this.getFiltered().length === 0 ? 0 : 1;
+		this.tableSettings['end'] = Math.min(this.getFiltered().length, this.tableSettings['start'] + length - 1);
 		return this;
 	} catch (err) {
 		throw new Error("error caught @ toBegining() - " + err);
@@ -454,7 +473,7 @@ InteractiveTable.prototype.toBegining = function () {
 InteractiveTable.prototype.priviousPage = function () {
 	try {
 		const length = this.tableSettings['end'] - this.tableSettings['start'] + 1;
-		this.tableSettings['start'] = Math.max(this.getFiltered(false).length === 0 ? 0 : 1, this.tableSettings['start'] - length);
+		this.tableSettings['start'] = Math.max(this.getFiltered().length === 0 ? 0 : 1, this.tableSettings['start'] - length);
 		this.tableSettings['end'] = Math.min(this.tableData.length, this.tableSettings['start'] + length - 1);
 		return this;
 	} catch (err) {
@@ -465,7 +484,7 @@ InteractiveTable.prototype.priviousPage = function () {
 InteractiveTable.prototype.nextPage = function () {
 	try {
 		const length = this.tableSettings['end'] - this.tableSettings['start'] + 1;
-		this.tableSettings['end'] = Math.min(this.getFiltered(false).length, this.tableSettings['end'] + length);
+		this.tableSettings['end'] = Math.min(this.getFiltered().length, this.tableSettings['end'] + length);
 		this.tableSettings['start'] = Math.max(1, this.tableSettings['end'] - length + 1);
 		return this;
 	} catch (err) {
@@ -476,7 +495,7 @@ InteractiveTable.prototype.nextPage = function () {
 InteractiveTable.prototype.toEnding = function () {
 	try {
 		const length = this.tableSettings['end'] - this.tableSettings['start'] + 1;
-		this.tableSettings['end'] = this.getFiltered(false).length;
+		this.tableSettings['end'] = this.getFiltered().length;
 		this.tableSettings['start'] = Math.max(1, this.tableSettings['end'] - length + 1);
 		return this;
 	} catch (err) {
@@ -522,7 +541,7 @@ InteractiveTable.prototype.printPaginationGroup = function () {
 		this.setEnd(this.tableSettings['end']);
 		const startInput = '<input type="text" style=\'text-align:center; padding: 3px 8px; width: ' + (Math.max(1, Math.ceil(Math.log10(this.tableData.length))) * 8 + 20) + 'px;\' value="' + this.tableSettings['start'] + '" onchange="' + this.identifier + '.setStart(this.value).refreshTable()" />';
 		const endInput = '<input type="text" style=\'text-align:center; padding: 3px 8px; width: ' + (Math.max(1, Math.ceil(Math.log10(this.tableData.length))) * 8 + 20) + 'px;\' value="' + this.tableSettings['end'] + '" onchange="' + this.identifier + '.setEnd(this.value).refreshTable()" />';
-		const totalRows = this.getFiltered(false).length;
+		const totalRows = this.getFiltered().length;
 		const toBeginingButton = '<button class="' + this.tableSettings['buttonClass'] + '" onclick="' + this.identifier + '.toBegining().refreshTable();">' + this.tableSettings['toBegining'] + '</button>';
 		const previousButton = '<button style="margin-left:5px;" class="' + this.tableSettings['buttonClass'] + '" onclick="' + this.identifier + '.priviousPage().refreshTable();">' + this.tableSettings['previousPage'] + '</button>';
 		const nextButton = '<button style="margin-right:5px;" class="' + this.tableSettings['buttonClass'] + '" onclick="' + this.identifier + '.nextPage().refreshTable();">' + this.tableSettings['nextPage'] + '</button>';
@@ -695,7 +714,7 @@ InteractiveTable.prototype.printTable = function () {
 		/*rows*/
 		var start = this.tableSettings['start'];
 		var end = this.tableSettings['end'];
-		var filteredData = this.getFiltered(false).slice(start - 1, end);
+		var filteredData = this.getFiltered().slice(start - 1, end);
 		filteredData.forEach((row, index) => {
 			var rowsStyle = (col) => {
 				return this.toStyleString({ ...(this.tableSettings.rowsStyle || ''), ...(col.rowsStyle || '') });
