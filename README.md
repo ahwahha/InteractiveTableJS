@@ -37,77 +37,80 @@ You can modify text you see on buttons and number of selected notice by change b
 `"nextPage"`<br>
 `"toEnding"`<br>
 <br>
-Default tableSettings is :<br>
-`{
-		"label": "",
-		"columns": [
-			{
-				header: "Header",
-				data: "",
-				filter: "",
-				filterPlaceholder: "placeholder",
-				modifier: "(row)=>{return 'data:' + JSON.stringify(row);}",
-				headerStyle: {},
-				filterStyle: {},
-				rowsStyle: {}
-			}
-		],
-		"start": 1,
-		"defaultStart": 1,
-		"end": 10,
-		"defaultEnd": 10,
-		"maxRows": 100,
-		"buttonClass": 'button',
-		"multiSelect": true,
-		"actionsGroupStyle": '',
-		"paginationGroupStyle": '',
-		"maxHeight": undefined,
-		"selectAllFiltered": 'Select all filtered',
-		"unselectAllFiltered": 'Unselect all filtered',
-		"noOfSelected": 'No. of selected: ',
-		"resetFilters": 'Reset filters',
-		"resetEdits": 'Reset edits',
-		"toBegining": '<<',
-		"previousPage": '<',
-		"nextPage": '>',
-		"toEnding": '>>',
-		"headersStyle": {
-			"border": "#aaa solid 1px",
-			"height": "calc(100% - 8px)",
-			"display": "flex",
-			"flex-flow": "column nowrap",
-			"padding": "3px",
-			"border-radius": "5px",
-			"margin": "1px",
-			"text-align": "left",
-			"font-weight": "bold",
-			"font-size": "12px",
-			"background-color": "#add"
-		},
-		"filtersStyle": {
-			"border": "#aaa solid 1px",
-			"padding": "3px",
-			"border-radius": "5px",
-			"margin": "1px",
-			"text-align": "center",
-			"font-size": "12px",
-			"width": "calc(100% - 2px)"
-		},
-		"rowsStyle": {
-			"text-align": "center",
-			"font-size": "12px"
-		},
-		"oddRowsStyle": {},
-		"evenRowsStyle": {
-			"background-color": "#f9f9f9"
+Default tableSettings is:
+```xml
+{
+	"label": "",
+	"columns": [
+		{
+			header: "Header",
+			data: "",
+			filter: "",
+			filterPlaceholder: "placeholder",
+			modifier: "(row)=>{return 'data:' + JSON.stringify(row);}",
+			headerStyle: {},
+			filterStyle: {},
+			rowsStyle: {}
 		}
-	}`<br>
+	],
+	"start": 1,
+	"defaultStart": 1,
+	"end": 10,
+	"defaultEnd": 10,
+	"maxRows": 100,
+	"buttonClass": 'button',
+	"multiSelect": true,
+	"actionsGroupStyle": '',
+	"paginationGroupStyle": '',
+	"maxHeight": undefined,
+	"selectAllFiltered": 'Select all filtered',
+	"unselectAllFiltered": 'Unselect all filtered',
+	"noOfSelected": 'No. of selected: ',
+	"resetFilters": 'Reset filters',
+	"resetEdits": 'Reset edits',
+	"toBegining": '<<',
+	"previousPage": '<',
+	"nextPage": '>',
+	"toEnding": '>>',
+	"headersStyle": {
+		"border": "#aaa solid 1px",
+		"height": "calc(100% - 8px)",
+		"display": "flex",
+		"flex-flow": "column nowrap",
+		"padding": "3px",
+		"border-radius": "5px",
+		"margin": "1px",
+		"text-align": "left",
+		"font-weight": "bold",
+		"font-size": "12px",
+		"background-color": "#add"
+	},
+	"filtersStyle": {
+		"border": "#aaa solid 1px",
+		"padding": "3px",
+		"border-radius": "5px",
+		"margin": "1px",
+		"text-align": "center",
+		"font-size": "12px",
+		"width": "calc(100% - 2px)"
+	},
+	"rowsStyle": {
+		"text-align": "center",
+		"font-size": "12px"
+	},
+	"oddRowsStyle": {},
+	"evenRowsStyle": {
+		"background-color": "#f9f9f9"
+	}
+}
+```
 <br>
 You get the subset of the table's data of currently selected/filtered/edited by below functions:<br>
 `.getSelected()`<br>
 `.getFiltered()`<br>
 `.getEdited()`<br>
-or by passing one into another like `.getFiltered(getSelected())`<br><br>
+or by passing one into another like `.getFiltered(getSelected())`<br>
+<br>
 The result of above methoes contain some extra properties of keys in each table row for keeping the table works.<br>
 To remove these properties, just pass the array into the method `.cleanKeys(arr)`<br>
 To remove specific properties in each row, you can pass the array into `.removeKeys(arr,keys)`<br>
