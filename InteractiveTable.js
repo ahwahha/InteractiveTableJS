@@ -48,7 +48,7 @@ function InteractiveTable(id) {
 			"flex-flow": "column nowrap",
 			"padding": "3px",
 			"border-radius": "5px",
-			"margin": "1px",
+			"margin": "0px",
 			"text-align": "left",
 			"font-weight": "bold",
 			"font-size": "12px",
@@ -58,10 +58,10 @@ function InteractiveTable(id) {
 			"border": "#aaa solid 1px",
 			"padding": "3px",
 			"border-radius": "5px",
-			"margin": "1px",
+			"margin": "0px",
 			"text-align": "center",
 			"font-size": "12px",
-			"width": "calc(100% - 2px)"
+			"width": "100%"
 		},
 		"rowsStyle": {
 			"text-align": "center",
