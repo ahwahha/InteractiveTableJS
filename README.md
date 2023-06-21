@@ -53,6 +53,8 @@ Default tableSettings is:
 			rowsStyle: {}
 		}
 	],
+	"sortedBy": null,
+	"ascending": true,
 	"start": 1,
 	"defaultStart": 1,
 	"end": 10,
@@ -79,7 +81,7 @@ Default tableSettings is:
 		"flex-flow": "column nowrap",
 		"padding": "3px",
 		"border-radius": "5px",
-		"margin": "1px",
+		"margin": "0px",
 		"text-align": "left",
 		"font-weight": "bold",
 		"font-size": "12px",
@@ -89,10 +91,10 @@ Default tableSettings is:
 		"border": "#aaa solid 1px",
 		"padding": "3px",
 		"border-radius": "5px",
-		"margin": "1px",
+		"margin": "0px",
 		"text-align": "center",
 		"font-size": "12px",
-		"width": "calc(100% - 2px)"
+		"width": "100%"
 	},
 	"rowsStyle": {
 		"text-align": "center",

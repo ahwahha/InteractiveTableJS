@@ -4,8 +4,6 @@ function InteractiveTable(id) {
 	this.container = null;
 	this.tableData = [{ "key": "value" }];
 	this.originalTableData = null;
-	this.sortingBy = null;
-	this.ascending = true;
 	this.haveSelection = false;
 	this.edited = false;
 	this.tableDefaultSettings = {
@@ -22,6 +20,8 @@ function InteractiveTable(id) {
 				rowsStyle: {}
 			}
 		],
+		"sortedBy": null,
+		"ascending": true,
 		"start": 1,
 		"defaultStart": 1,
 		"end": 10,
@@ -98,7 +98,7 @@ InteractiveTable.prototype.setData = function (data) {
 		});
 		this.tableData = data;
 		this.sort("row-index", true);
-		this.sortingBy = "row-index";
+		this.tableSettings['sortedBy'] = "row-index";
 		this.originalTableData = JSON.parse(JSON.stringify(data));
 		return this;
 	} catch (error) {
@@ -339,7 +339,7 @@ InteractiveTable.prototype.filterRows = function () {
 	}
 }
 
-InteractiveTable.prototype.sort = function (data, order = true) {
+InteractiveTable.prototype.sort = function (data, order) {
 	try {
 		const sortedData = this.tableData.sort((a, b) => {
 			const aValue = a[data] || '';
@@ -376,8 +376,8 @@ InteractiveTable.prototype.sort = function (data, order = true) {
 			return 0;
 		});
 		this.tableData = sortedData;
-		this.sortingBy = data;
-		this.ascending = order;
+		this.tableSettings['sortedBy'] = data;
+		this.tableSettings['ascending'] = order;
 		return this;
 	} catch (error) {
 		throw new Error("error caught @ sort(" + data + ", " + order + "): " + error);
@@ -691,11 +691,13 @@ InteractiveTable.prototype.printTable = function () {
 	try {
 		var html = "";
 
+		this.sort(this.tableSettings['sortedBy'], this.tableSettings['ascending']);
+
 		/*headers*/
 		html += "<table style='width:100%;height:min-content;'><thead><tr>";
 		this.tableSettings['columns'].forEach((col) => {
 			var headerStyle = this.toStyleString({ ...(this.tableSettings['headersStyle'] || {}), ...(col['headerStyle'] || {}) });
-			var headerHtml = '<div style="' + headerStyle + '" class="sort-header ' + (this.sortingBy === col['data'] ? 'sorting' : '') + '" onclick="' + this.identifier + '.sort(\'' + col['data'] + '\', ' + (this.sortingBy !== col['data'] || !this.ascending) + ').refreshTable()"><div style="flex:1;height:0px;"></div>' + col.header + (this.sortingBy === col['data'] ? (this.ascending ? '&#9650;' : '&#9660;') : '') + '<div style="flex:1;"></div></div>';
+			var headerHtml = '<div style="' + headerStyle + '" class="sort-header ' + (this.tableSettings['sortedBy'] === col['data'] ? 'sorting' : '') + '" onclick="' + this.identifier + '.sort(\'' + col['data'] + '\', ' + (this.tableSettings['sortedBy'] !== col['data'] || !this.tableSettings['ascending']) + ').refreshTable()"><div style="flex:1;height:0px;"></div>' + col.header + (this.tableSettings['sortedBy'] === col['data'] ? (this.tableSettings['ascending'] ? '&#9650;' : '&#9660;') : '') + '<div style="flex:1;"></div></div>';
 			html += '<td style="padding:0px;">' + headerHtml + '</td>';
 		});
 		html += '</tr>';
