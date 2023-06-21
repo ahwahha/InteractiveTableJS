@@ -321,7 +321,6 @@ InteractiveTable.prototype.sortAsOriginal = function () {
 
 InteractiveTable.prototype.filterRows = function () {
 	try {
-		const length = this.tableSettings['end'] - this.tableSettings['start'] + 1;
 		this.tableData.forEach((row) => {
 			let isFiltered = true;
 			for (const col of this.tableSettings['columns']) {
@@ -333,8 +332,6 @@ InteractiveTable.prototype.filterRows = function () {
 			}
 			row["row-filtered"] = isFiltered;
 		});
-		this.setStart(1);
-		this.setEnd(Math.max(length, this.tableSettings['defaultEnd']));
 		return this;
 	} catch (error) {
 		throw new Error("error caught @ filterRows(): " + error);
@@ -440,7 +437,19 @@ InteractiveTable.prototype.setStart = function (start) {
 	try {
 		let rowNumber = parseInt(start);
 		if (!Number.isNaN(rowNumber)) {
-			this.tableSettings = { ...this.tableSettings, start: Math.max((this.getFiltered().length === 0 ? 0 : 1), Math.min(rowNumber, this.tableSettings['end']), this.tableSettings['end'] - this.tableSettings['maxRows'] + 1) };
+			this.tableSettings = {
+				...this.tableSettings
+				, start: Math.max(
+					Math.min(
+						rowNumber,
+						this.tableSettings['end']
+					),
+					Math.max(
+						(this.getFiltered().length === 0 ? 0 : 1),
+						this.tableSettings['end'] - this.tableSettings['maxRows'] + 1
+					)
+				)
+			};
 		}
 		return this;
 	} catch (err) {
@@ -452,7 +461,19 @@ InteractiveTable.prototype.setEnd = function (end) {
 	try {
 		let rowNumber = parseInt(end);
 		if (!Number.isNaN(rowNumber)) {
-			this.tableSettings = { ...this.tableSettings, end: Math.min(Math.max(rowNumber, this.tableSettings['start']), this.getFiltered().length, this.tableSettings['start'] + this.tableSettings['maxRows'] - 1) };
+			this.tableSettings = {
+				...this.tableSettings
+				, end: Math.min(
+					Math.max(
+						rowNumber,
+						this.tableSettings['start']
+					),
+					Math.min(
+						this.getFiltered().length,
+						this.tableSettings['start'] + this.tableSettings['maxRows'] - 1
+					)
+				)
+			};
 		}
 		return this;
 	} catch (err) {
@@ -522,7 +543,7 @@ InteractiveTable.prototype.printSelectingGroup = function () {
 
 InteractiveTable.prototype.printResetFiltersButton = function () {
 	try {
-		return '<button class="' + this.tableSettings['buttonClass'] + '" onclick="' + this.identifier + '.resetFilters().filterRows().refreshTable();">' + this.tableSettings.resetFilters + '</button>';
+		return '<button class="' + this.tableSettings['buttonClass'] + '" onclick="' + this.identifier + '.resetFilters().filterRows().resetPageNumbers().refreshTable();">' + this.tableSettings.resetFilters + '</button>';
 	} catch (err) {
 		throw new Error("error caught @ printResetFiltersButton() - " + err);
 	}
@@ -530,7 +551,7 @@ InteractiveTable.prototype.printResetFiltersButton = function () {
 
 InteractiveTable.prototype.printResetEditsButton = function () {
 	try {
-		return this.edited ? '<button class="' + this.tableSettings['buttonClass'] + '" onclick="' + this.identifier + '.resetData().filterRows().refreshTable();">' + this.tableSettings.resetEdits + '</button>' : '';
+		return this.edited ? '<button class="' + this.tableSettings['buttonClass'] + '" onclick="' + this.identifier + '.resetData().filterRows().resetPageNumbers().refreshTable();">' + this.tableSettings.resetEdits + '</button>' : '';
 	} catch (err) {
 		throw new Error("error caught @ printResetEditsButton() - " + err);
 	}
@@ -538,8 +559,6 @@ InteractiveTable.prototype.printResetEditsButton = function () {
 
 InteractiveTable.prototype.printPaginationGroup = function () {
 	try {
-		this.setStart(this.tableSettings['start']);
-		this.setEnd(this.tableSettings['end']);
 		const startInput = '<input type="text" style=\'text-align:center; padding: 3px 8px; width: ' + (Math.max(1, Math.ceil(Math.log10(this.tableData.length))) * 8 + 20) + 'px;\' value="' + this.tableSettings['start'] + '" onchange="' + this.identifier + '.setStart(this.value).refreshTable()" />';
 		const endInput = '<input type="text" style=\'text-align:center; padding: 3px 8px; width: ' + (Math.max(1, Math.ceil(Math.log10(this.tableData.length))) * 8 + 20) + 'px;\' value="' + this.tableSettings['end'] + '" onchange="' + this.identifier + '.setEnd(this.value).refreshTable()" />';
 		const totalRows = this.getFiltered().length;
@@ -556,8 +575,6 @@ InteractiveTable.prototype.printPaginationGroup = function () {
 InteractiveTable.prototype.setFilter = function (index, value) {
 	try {
 		this.tableSettings['columns'][index]['filter'] = value;
-		this.tableSettings['start'] = 1;
-		this.setEnd(Math.max(length, this.tableSettings['defaultEnd']));
 		return this;
 	} catch (err) {
 		throw new Error("error caught @ setFilter(" + index + ", " + value + ") - " + err);
@@ -566,15 +583,24 @@ InteractiveTable.prototype.setFilter = function (index, value) {
 
 InteractiveTable.prototype.resetFilters = function () {
 	try {
-		const length = this.tableSettings['end'] - this.tableSettings['start'] + 1;
 		this.tableSettings['columns'].forEach((col) => {
 			col['filter'] = "";
 		});
-		this.tableSettings['start'] = 1;
-		this.setEnd(Math.max(length, this.tableSettings['defaultEnd']));
 		return this;
 	} catch (err) {
 		throw new Error("error caught @ resetFilters() - " + err);
+	}
+}
+
+InteractiveTable.prototype.resetPageNumbers = function () {
+	try {
+		console.log('!');
+		const length = this.tableSettings['end'] - this.tableSettings['start'] + 1;
+		this.setStart(this.getFiltered().length === 0 ? 0 : 1);
+		this.setEnd(Math.max(length, this.tableSettings['defaultEnd']));
+		return this;
+	} catch (err) {
+		throw new Error("error caught @ resetPageNumbers() - " + err);
 	}
 }
 
@@ -714,13 +740,18 @@ InteractiveTable.prototype.printTable = function () {
 			var filterStyle = this.toStyleString({ ...(this.tableSettings['filtersStyle'] || {}), ...(col['filterStyle'] || {}) });
 			var filterValue = col['filter'] || '';
 			var filterPlaceholder = col['filterPlaceholder'] || '';
-			html += '<td style="padding:0px;"><input style="' + filterStyle + '" class="filtering-input" type="text" style="width:100%;" value="' + this.stringToAscii(filterValue) + '" onchange="' + this.identifier + '.setFilter(' + this.tableSettings['columns'].indexOf(col) + ',this.value).filterRows().refreshTable();" placeholder="' + filterPlaceholder + '" /></td>';
+			html += '<td style="padding:0px;"><input style="' + filterStyle + '" class="filtering-input" type="text" style="width:100%;" value="' + this.stringToAscii(filterValue) + '" onchange="' + this.identifier + '.setFilter(' + this.tableSettings['columns'].indexOf(col) + ',this.value).filterRows().resetPageNumbers().refreshTable();" placeholder="' + filterPlaceholder + '" /></td>';
 		});
 		html += '</tr></head><tbody>';
 
 		/*rows*/
-		var start = this.tableSettings['start'];
-		var end = this.tableSettings['end'];
+
+		let start = this.tableSettings['start'];
+		let end = this.tableSettings['end'];
+		let length = Math.min(this.tableData.length, this.tableSettings['defaultEnd'] - this.tableSettings['defaultStart'] + 1);
+		// if (end - start + 1 < length) {
+		// 	end = start + length - 1;
+		// }
 		var filteredData = this.getFiltered().slice(start - 1, end);
 		filteredData.forEach((row, index) => {
 			var rowsStyle = (col) => {
@@ -770,6 +801,7 @@ InteractiveTable.prototype.printTable = function () {
 InteractiveTable.prototype.fillTable = function (id) {
 	try {
 		if (document.getElementById(id) !== null) {
+			this.resetPageNumbers();
 			document.getElementById(id).innerHTML = this.printTable();
 		}
 		this.container = id;
