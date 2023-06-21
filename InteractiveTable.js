@@ -49,7 +49,7 @@ function InteractiveTable(id) {
 			"padding": "3px",
 			"border-radius": "5px",
 			"margin": "0px",
-			"text-align": "left",
+			"text-align": "center",
 			"font-weight": "bold",
 			"font-size": "12px",
 			"background-color": "#add"
