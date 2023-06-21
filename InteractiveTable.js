@@ -251,17 +251,19 @@ InteractiveTable.prototype.setEdited = function (arr) {
 		arr = (arr || this.tableData);
 		for (let i = 0; i < arr.length; i++) {
 			const row = arr[i];
-			const origRow = this.originalTableData.find(origDataRow => origDataRow['row-index'] === row['row-index']);
+			const oriRow = this.originalTableData.find(origDataRow => origDataRow['row-index'] === row['row-index']);
+			this.edited = false;
 			let isEdited = false;
 			for (const key in row) {
 				if (!key.startsWith('row-')) {
-					if (row[key] !== origRow[key]) {
+					if (row[key] !== oriRow[key]) {
 						isEdited = true;
 						break;
 					}
 				}
 			}
 			row['row-edited'] = isEdited;
+			this.edited = !(this.edited && isEdited);
 		}
 		return this;
 	} catch (error) {
@@ -659,15 +661,19 @@ InteractiveTable.prototype.match = function (text, matchingText, caseSensitive) 
 
 InteractiveTable.prototype.editData = function (index, data, value) {
 	try {
-		this.edited = true;
 		let row = this.tableData.find((row) => {
 			return row['row-index'] === index;
 		});
-		if (row['ori-' + data] === undefined) {
-			row['ori-' + data] = row[data];
+		if (row[data] !== value) {
+			if (row['ori-' + data] === undefined) {
+				row['ori-' + data] = row[data];
+			} else if (row['ori-' + data] === value) {
+				delete row['ori-' + data];
+			}
+			row[data] = value;
+			this.setEdited();
+			this.refreshTable();
 		}
-		row[data] = value;
-		this.refreshTable();
 		return this;
 	} catch (err) {
 		throw new Error("error caught @ editData(" + index + ", " + data + ", " + value + "): " + err);
