@@ -594,7 +594,6 @@ InteractiveTable.prototype.resetFilters = function () {
 
 InteractiveTable.prototype.resetPageNumbers = function () {
 	try {
-		console.log('!');
 		const length = this.tableSettings['end'] - this.tableSettings['start'] + 1;
 		this.setStart(this.getFiltered().length === 0 ? 0 : 1);
 		this.setEnd(Math.max(length, this.tableSettings['defaultEnd']));
