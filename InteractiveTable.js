@@ -20,7 +20,7 @@ function InteractiveTable(id) {
 				rowsStyle: {}
 			}
 		],
-		"sortedBy": null,
+		"sortedBy": 'row-index',
 		"ascending": true,
 		"start": 1,
 		"defaultStart": 1,
