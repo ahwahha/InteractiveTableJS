@@ -14,10 +14,13 @@ Then three functions to make it starts working:<br>
 `.setTableSettings(setting)` : to overwrite default properties if exists in the input object.<br>
 `.fillTable(containerName)` : to write the content into the container named as the input.<br>
 <br>
-There should be one property in tableSettings with key 'columns' which is an array of objects of properties defining what columns with what values to be shown.<br>
-`'header'` to be the tag shown in the header row<br>
-`'data'` to be the property key of the row value to be shown<br>
-These properties may optionally contain one with key 'modifier' valued as a Function like below to replace what is orginally to be shown<br>
+There should be one property in tableSettings with key `"columns"` which is an array of objects of properties defining what columns with what values to be shown.<br>
+Below properties must be included for each row object inside the `"columns"` array:<br>
+`"header"` to be the tag shown in the header row<br>
+`"data"` to be the property key of the row value to be shown<br>
+<br>
+`"modifier"` can be optionally included for each row object inside the `"columns"` array:<br>
+`"modifier"` valued as a Function like below to replace what is orginally to be shown<br>
 `new Function('row', 'return "whatever html you want to be shown";')`<br>
 or `(row)=>{return 'whatever html you want to be shown';}`<br>
 or any predefined function which accept the data row.<br>
@@ -25,6 +28,7 @@ inside what you return, you may put: <br>
 `.printCheckBox(row)` which, when exists, turn on the selecting functionality of the table, and<br>
 `.editData(row['row-index'], key, value)` which replace the cell value by your input.<br>
 `.refreshTable()` whenever you need to refresh the content to be shown, eg. after .editData be called.<br>
+You can have other optional properties inside `"columns"` for overwriting default style and values in table content. Please see the complete list in the default tableSettings['columns'] below.<br>
 <br>
 You can modify text you see on buttons and number of selected notice by change below properties in tableSettings:<br>
 `"selectAllFiltered"`<br>
@@ -37,7 +41,7 @@ You can modify text you see on buttons and number of selected notice by change b
 `"nextPage"`<br>
 `"toEnding"`<br>
 <br>
-Default tableSettings is:
+You can also overwriting default style by having `"xxxxStyle"` properties inside tableSettings object. Please see the default values as below:
 ```xml
 {
 	"label": "",
@@ -50,7 +54,8 @@ Default tableSettings is:
 			modifier: "(row)=>{return 'data:' + JSON.stringify(row);}",
 			headerStyle: {},
 			filterStyle: {},
-			rowsStyle: {}
+			rowsStyle: {},
+			widthStyle: { "width": "auto", "min-width": "auto", "max-width": "auto" }
 		}
 	],
 	"sortedBy": 'row-index',
@@ -75,30 +80,29 @@ Default tableSettings is:
 	"nextPage": '>',
 	"toEnding": '>>',
 	"headersStyle": {
-		"border": "#aaa solid 1px",
+		"border": "none",
+		"border-radius": "5px",
+		"outline": "#aaa solid 1px",
 		"height": "calc(100% - 8px)",
 		"display": "flex",
 		"flex-flow": "column nowrap",
 		"padding": "3px",
-		"border-radius": "5px",
-		"margin": "0px",
-		"text-align": "left",
+		"margin": "2px",
+		"text-align": "center",
 		"font-weight": "bold",
-		"font-size": "12px",
 		"background-color": "#add"
 	},
 	"filtersStyle": {
-		"border": "#aaa solid 1px",
-		"padding": "3px",
+		"border": "none",
 		"border-radius": "5px",
-		"margin": "0px",
+		"outline": "#aaa solid 1px",
+		"margin": "2px",
 		"text-align": "center",
-		"font-size": "12px",
-		"width": "100%"
+		"height": "min-content",
+		"overflow": "hidden"
 	},
 	"rowsStyle": {
 		"text-align": "center",
-		"font-size": "12px"
 	},
 	"oddRowsStyle": {},
 	"evenRowsStyle": {

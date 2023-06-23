@@ -17,7 +17,8 @@ function InteractiveTable(id) {
 				modifier: "(row)=>{return 'data:' + JSON.stringify(row);}",
 				headerStyle: {},
 				filterStyle: {},
-				rowsStyle: {}
+				rowsStyle: {},
+				widthStyle: { "width": "auto", "min-width": "auto", "max-width": "auto" }
 			}
 		],
 		"sortedBy": 'row-index',
@@ -42,30 +43,29 @@ function InteractiveTable(id) {
 		"nextPage": '>',
 		"toEnding": '>>',
 		"headersStyle": {
-			"border": "#aaa solid 1px",
+			"border": "none",
+			"border-radius": "5px",
+			"outline": "#aaa solid 1px",
 			"height": "calc(100% - 8px)",
 			"display": "flex",
 			"flex-flow": "column nowrap",
 			"padding": "3px",
-			"border-radius": "5px",
-			"margin": "0px",
+			"margin": "2px",
 			"text-align": "center",
 			"font-weight": "bold",
-			"font-size": "12px",
 			"background-color": "#add"
 		},
 		"filtersStyle": {
-			"border": "#aaa solid 1px",
-			"padding": "3px",
+			"border": "none",
 			"border-radius": "5px",
-			"margin": "0px",
+			"outline": "#aaa solid 1px",
+			"margin": "2px",
 			"text-align": "center",
-			"font-size": "12px",
-			"width": "100%"
+			"height": "min-content",
+			"overflow": "hidden"
 		},
 		"rowsStyle": {
 			"text-align": "center",
-			"font-size": "12px"
 		},
 		"oddRowsStyle": {},
 		"evenRowsStyle": {
@@ -78,7 +78,7 @@ function InteractiveTable(id) {
 InteractiveTable.prototype.toStyleString = function (obj) {
 	try {
 		var output = '';
-		for (const [key, value] of Object.entries(obj)) {
+		for (const [key, value] of Object.entries(obj || {})) {
 			output += key + ':' + value + ';';
 		}
 		return output;
@@ -724,12 +724,23 @@ InteractiveTable.prototype.printTable = function () {
 
 		this.sort(this.tableSettings['sortedBy'], this.tableSettings['ascending']);
 
+		html += "<table style='width:100%;height:min-content;border-collapse: collapse;'><tbody>";
+
 		/*headers*/
-		html += "<table style='width:100%;height:min-content;'><thead><tr>";
+		html += "<tr>";
 		this.tableSettings['columns'].forEach((col) => {
-			var headerStyle = this.toStyleString({ ...(this.tableSettings['headersStyle'] || {}), ...(col['headerStyle'] || {}) });
-			var headerHtml = '<div style="' + headerStyle + '" class="sort-header ' + (this.tableSettings['sortedBy'] === col['data'] ? 'sorting' : '') + '" onclick="' + this.identifier + '.sort(\'' + col['data'] + '\', ' + (this.tableSettings['sortedBy'] !== col['data'] || !this.tableSettings['ascending']) + ').refreshTable()"><div style="flex:1;height:0px;"></div>' + col.header + (this.tableSettings['sortedBy'] === col['data'] ? (this.tableSettings['ascending'] ? '&#9650;' : '&#9660;') : '') + '<div style="flex:1;"></div></div>';
-			html += '<td style="padding:0px;">' + headerHtml + '</td>';
+			var headerStyle = { ...(this.tableSettings['headersStyle'] || {}), ...(col['headerStyle'] || {}) };
+			var headerHtml = '<div'
+				+ ' style="' + this.toStyleString(headerStyle) + '"'
+				+ ' class="sort-header ' + (this.tableSettings['sortedBy'] === col['data'] ? 'sorting' : '') + '"'
+				+ ' onclick="' + this.identifier + '.sort(\'' + col['data'] + '\', ' + (this.tableSettings['sortedBy'] !== col['data'] || !this.tableSettings['ascending']) + ').refreshTable()"'
+				+ '>'
+				+ '<div style="flex:1;"></div>'
+				+ col.header
+				+ (this.tableSettings['sortedBy'] === col['data'] ? (this.tableSettings['ascending'] ? '&#9650;' : '&#9660;') : '')
+				+ '<div style="flex:1;"></div>'
+				+ '</div>';
+			html += '<td style="padding:0px;' + this.toStyleString(col['widthStyle']) + '">' + headerHtml + '</td>';
 		});
 		html += '</tr>';
 
@@ -739,25 +750,32 @@ InteractiveTable.prototype.printTable = function () {
 			var filterStyle = this.toStyleString({ ...(this.tableSettings['filtersStyle'] || {}), ...(col['filterStyle'] || {}) });
 			var filterValue = col['filter'] || '';
 			var filterPlaceholder = col['filterPlaceholder'] || '';
-			html += '<td style="padding:0px;"><input style="' + filterStyle + '" class="filtering-input" type="text" style="width:100%;" value="' + this.stringToAscii(filterValue) + '" onchange="' + this.identifier + '.setFilter(' + this.tableSettings['columns'].indexOf(col) + ',this.value).filterRows().resetPageNumbers().refreshTable();" placeholder="' + filterPlaceholder + '" /></td>';
+			var filterHtml = '<div'
+				+ ' style="' + filterStyle + '"'
+				+ '>'
+				+ '<input'
+				+ ' class="filtering-input"'
+				+ ' style="border:none;width:100%;"'
+				+ ' type="text"'
+				+ ' placeholder="' + filterPlaceholder + '"'
+				+ ' onchange="' + this.identifier + '.setFilter(' + this.tableSettings['columns'].indexOf(col) + ',this.value).filterRows().resetPageNumbers().refreshTable();"'
+				+ ' value="' + this.stringToAscii(filterValue) + '"'
+				+ '>'
+				+ '</div>';
+			html += '<td style="padding:0px;' + this.toStyleString(col['widthStyle']) + '">' + filterHtml + '</td>';
 		});
-		html += '</tr></head><tbody>';
+		html += '</tr>';
 
 		/*rows*/
-
 		let start = this.tableSettings['start'];
 		let end = this.tableSettings['end'];
-		let length = Math.min(this.tableData.length, this.tableSettings['defaultEnd'] - this.tableSettings['defaultStart'] + 1);
-		// if (end - start + 1 < length) {
-		// 	end = start + length - 1;
-		// }
 		var filteredData = this.getFiltered().slice(start - 1, end);
 		filteredData.forEach((row, index) => {
 			var rowsStyle = (col) => {
-				return this.toStyleString({ ...(this.tableSettings.rowsStyle || ''), ...(col.rowsStyle || '') });
+				return { ...(this.tableSettings.rowsStyle || ''), ...(col.rowsStyle || '') };
 			};
 			var oddEvenRowsStyle = (col) => {
-				return this.toStyleString((index % 2 === 1 ? this.tableSettings.evenRowsStyle : this.tableSettings.oddRowsStyle));
+				return (index % 2 === 1 ? this.tableSettings.evenRowsStyle : this.tableSettings.oddRowsStyle);
 			};
 			html += '<tr>';
 			this.tableSettings['columns'].forEach((col) => {
@@ -768,7 +786,7 @@ InteractiveTable.prototype.printTable = function () {
 						cellData = col.modifier(clone);
 					}
 				}
-				html += '<td style="' + oddEvenRowsStyle(col) + rowsStyle(col) + '">' + cellData + '</td>';
+				html += '<td style="' + this.toStyleString({ ...oddEvenRowsStyle(col), ...rowsStyle(col) }) + '">' + cellData + '</td>';
 			});
 			html += '</tr>';
 		});
@@ -787,7 +805,7 @@ InteractiveTable.prototype.printTable = function () {
 			+ "</div>"
 			+ "</div>"
 			+ "</div>"
-			+ "<div style='width:100%;overflow:auto;" + (this.tableSettings['maxHeight'] ? " max-height:" + this.tableSettings['maxHeight'] + ";" : "") + " overflow:auto;'>" + html + "</div>"
+			+ "<div style='width:100%;overflow:auto;" + (this.tableSettings['maxHeight'] ? " max-height:" + this.tableSettings['maxHeight'] + ";" : "") + "'>" + html + "</div>"
 			+ this.printPaginationGroup()
 			+ '</div>\n';
 
