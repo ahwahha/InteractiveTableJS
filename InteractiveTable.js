@@ -753,7 +753,7 @@ InteractiveTable.prototype.printTable = function () {
 				+ '>'
 				+ '<input'
 				+ ' class="filtering-input"'
-				+ ' style="border:none;width:100%;"'
+				+ ' style="border:none; width:100%; padding:1px;"'
 				+ ' type="text"'
 				+ ' placeholder="' + filterPlaceholder + '"'
 				+ ' onchange="' + this.identifier + '.setFilter(' + this.tableSettings['columns'].indexOf(col) + ',this.value).filterRows().resetPageNumbers().refreshTable();"'
