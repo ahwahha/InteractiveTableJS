@@ -43,23 +43,21 @@ function InteractiveTable(id) {
 		"nextPage": '>',
 		"toEnding": '>>',
 		"headersStyle": {
-			"border": "none",
 			"border-radius": "5px",
-			"outline": "#aaa solid 1px",
+			"border": "#aaa solid 1px",
 			"height": "calc(100% - 8px)",
 			"display": "flex",
 			"flex-flow": "column nowrap",
 			"padding": "3px",
-			"margin": "2px",
+			"margin": "1px",
 			"text-align": "center",
 			"font-weight": "bold",
 			"background-color": "#add"
 		},
 		"filtersStyle": {
-			"border": "none",
 			"border-radius": "5px",
-			"outline": "#aaa solid 1px",
-			"margin": "2px",
+			"border": "#aaa solid 1px",
+			"margin": "1px",
 			"text-align": "center",
 			"height": "min-content",
 			"overflow": "hidden"
