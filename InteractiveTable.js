@@ -95,8 +95,6 @@ InteractiveTable.prototype.setData = function (data) {
 			row["row-edited"] = false;
 		});
 		this.tableData = data;
-		this.sort("row-index", true);
-		this.tableSettings['sortedBy'] = "row-index";
 		this.originalTableData = JSON.parse(JSON.stringify(data));
 		return this;
 	} catch (error) {
