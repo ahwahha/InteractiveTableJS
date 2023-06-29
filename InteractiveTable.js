@@ -95,8 +95,6 @@ InteractiveTable.prototype.setData = function (data) {
 			row["row-edited"] = false;
 		});
 		this.tableData = data;
-		this.sort("row-index", true);
-		this.tableSettings['sortedBy'] = "row-index";
 		this.originalTableData = JSON.parse(JSON.stringify(data));
 		return this;
 	} catch (error) {
@@ -336,8 +334,16 @@ InteractiveTable.prototype.filterRows = function () {
 	}
 }
 
-InteractiveTable.prototype.sort = function (data, order) {
+InteractiveTable.prototype.setSorting = function (data, order) {
+	this.tableSettings['sortedBy'] = data;
+	this.tableSettings['ascending'] = order;
+	return this;
+}
+
+InteractiveTable.prototype.sortRows = function () {
 	try {
+		let data = this.tableSettings['sortedBy'];
+		let order = this.tableSettings['ascending'];
 		const sortedData = this.tableData.sort((a, b) => {
 			const aValue = a[data] || '';
 			const bValue = b[data] || '';
@@ -373,8 +379,6 @@ InteractiveTable.prototype.sort = function (data, order) {
 			return 0;
 		});
 		this.tableData = sortedData;
-		this.tableSettings['sortedBy'] = data;
-		this.tableSettings['ascending'] = order;
 		return this;
 	} catch (error) {
 		throw new Error("error caught @ sort(" + data + ", " + order + "): " + error);
@@ -720,7 +724,8 @@ InteractiveTable.prototype.printTable = function () {
 	try {
 		var html = "";
 
-		this.sort(this.tableSettings['sortedBy'], this.tableSettings['ascending']);
+		this.sortRows();
+		this.filterRows();
 
 		html += "<table style='width:100%;height:min-content;border-collapse: collapse;'><tbody>";
 
@@ -731,7 +736,7 @@ InteractiveTable.prototype.printTable = function () {
 			var headerHtml = '<div'
 				+ ' style="' + this.toStyleString(headerStyle) + '"'
 				+ ' class="sort-header ' + (this.tableSettings['sortedBy'] === col['data'] ? 'sorting' : '') + '"'
-				+ ' onclick="' + this.identifier + '.sort(\'' + col['data'] + '\', ' + (this.tableSettings['sortedBy'] !== col['data'] || !this.tableSettings['ascending']) + ').refreshTable()"'
+				+ ' onclick="' + this.identifier + '.setSorting(\'' + col['data'] + '\', ' + (this.tableSettings['sortedBy'] === col['data'] ? !this.tableSettings['ascending'] : this.tableSettings['ascending']) + ').refreshTable()"'
 				+ '>'
 				+ '<div style="flex:1;"></div>'
 				+ col.header
