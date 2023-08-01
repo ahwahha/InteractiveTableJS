@@ -18,7 +18,6 @@ function InteractiveTable(id) {
 				headerStyle: {},
 				filterStyle: {},
 				rowsStyle: {},
-				widthStyle: { "width": "auto", "min-width": "auto", "max-width": "auto" }
 			}
 		],
 		"sortedBy": 'row-index',
@@ -38,6 +37,7 @@ function InteractiveTable(id) {
 		"noOfSelected": 'No. of selected: ',
 		"resetFilters": 'Reset filters',
 		"resetEdits": 'Reset edits',
+		"editFilter": 'Edit filter value:',
 		"toBegining": '<<',
 		"previousPage": '<',
 		"nextPage": '>',
@@ -59,6 +59,7 @@ function InteractiveTable(id) {
 			"border": "#aaa solid 1px",
 			"margin": "1px",
 			"text-align": "center",
+			"min-height": "12px",
 			"height": "min-content",
 			"overflow": "hidden"
 		},
@@ -743,7 +744,7 @@ InteractiveTable.prototype.printTable = function () {
 				+ (this.tableSettings['sortedBy'] === col['data'] ? (this.tableSettings['ascending'] ? '&#9650;' : '&#9660;') : '')
 				+ '<div style="flex:1;"></div>'
 				+ '</div>';
-			html += '<td style="padding:0px;' + this.toStyleString(col['widthStyle']) + '">' + headerHtml + '</td>';
+			html += '<td style="padding:0px;">' + headerHtml + '</td>';
 		});
 		html += '</tr>';
 
@@ -752,20 +753,13 @@ InteractiveTable.prototype.printTable = function () {
 		this.tableSettings['columns'].forEach((col) => {
 			var filterStyle = this.toStyleString({ ...(this.tableSettings['filtersStyle'] || {}), ...(col['filterStyle'] || {}) });
 			var filterValue = col['filter'] || '';
-			var filterPlaceholder = col['filterPlaceholder'] || '';
 			var filterHtml = '<div'
 				+ ' style="' + filterStyle + '"'
+				+ ' onclick="let val = prompt(\'' + this.tableSettings['editFilter'] + '\',\'' + this.stringToAscii(filterValue) + '\'); if(val!=null){' + this.identifier + '.setFilter(' + this.tableSettings['columns'].indexOf(col) + ',val).filterRows().resetPageNumbers().refreshTable();}"'
 				+ '>'
-				+ '<input'
-				+ ' class="filtering-input"'
-				+ ' style="border:none; width:100%; padding:1px;"'
-				+ ' type="text"'
-				+ ' placeholder="' + filterPlaceholder + '"'
-				+ ' onchange="' + this.identifier + '.setFilter(' + this.tableSettings['columns'].indexOf(col) + ',this.value).filterRows().resetPageNumbers().refreshTable();"'
-				+ ' value="' + this.stringToAscii(filterValue) + '"'
-				+ '>'
+				+ filterValue
 				+ '</div>';
-			html += '<td style="padding:0px;' + this.toStyleString(col['widthStyle']) + '">' + filterHtml + '</td>';
+			html += '<td style="padding:0px;">' + filterHtml + '</td>';
 		});
 		html += '</tr>';
 
