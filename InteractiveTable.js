@@ -36,7 +36,8 @@ function InteractiveTable(id) {
 		"unselectAllFiltered": 'Unselect all filtered',
 		"noOfSelected": 'No. of selected: ',
 		"resetFilters": 'Reset filters',
-		"resetEdits": 'Reset edits',
+		"selectEdited": 'Select edited',
+		"resetEdited": 'Reset edited',
 		"editFilter": 'Edit filter value:',
 		"toBegining": '<<',
 		"previousPage": '<',
@@ -164,6 +165,15 @@ InteractiveTable.prototype.setAllFilteredSelected = function (selected) {
 		return this;
 	} catch (error) {
 		throw new Error("error caught @ setAllFilteredSelected(" + selected + "): " + error);
+	}
+}
+
+InteractiveTable.prototype.setAllEditedSelected = function (selected) {
+	try {
+		this.tableData = this.tableData.map(row => row['row-edited'] ? { ...row, 'row-selected': selected } : row);
+		return this;
+	} catch (error) {
+		throw new Error("error caught @ setAllEditedSelected(" + selected + "): " + error);
 	}
 }
 
@@ -552,11 +562,14 @@ InteractiveTable.prototype.printResetFiltersButton = function () {
 	}
 }
 
-InteractiveTable.prototype.printResetEditsButton = function () {
+InteractiveTable.prototype.printEditedGroup = function () {
 	try {
-		return this.edited ? '<button class="' + this.tableSettings['buttonClass'] + '" onclick="' + this.identifier + '.resetData().filterRows().resetPageNumbers().refreshTable();">' + this.tableSettings.resetEdits + '</button>' : '';
+		return this.edited 
+			? '<button class="' + this.tableSettings['buttonClass'] + '" onclick="' + this.identifier + '.setAllEditedSelected().filterRows().resetPageNumbers().refreshTable();">' + this.tableSettings.selectEdited + '</button>'
+			+ '<button class="' + this.tableSettings['buttonClass'] + '" onclick="' + this.identifier + '.resetData().filterRows().resetPageNumbers().refreshTable();">' + this.tableSettings.resetEdited + '</button>'
+			: '';
 	} catch (err) {
-		throw new Error("error caught @ printResetEditsButton() - " + err);
+		throw new Error("error caught @ printEditedGroup() - " + err);
 	}
 }
 
@@ -798,7 +811,7 @@ InteractiveTable.prototype.printTable = function () {
 			+ "<div style='display:flex;flex-flow:row wrap;justify-content:flex-start;align-items:center;column-gap:3px;'>"
 			+ this.printSelectingGroup()
 			+ this.printResetFiltersButton()
-			+ this.printResetEditsButton()
+			+ this.printEditedGroup()
 			+ "</div>"
 			+ "</div>"
 			+ "</div>"
