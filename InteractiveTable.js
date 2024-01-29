@@ -270,7 +270,7 @@ InteractiveTable.prototype.setEdited = function (arr) {
 
 InteractiveTable.prototype.getData = function () {
 	try {
-		return JSON.parse(JSON.stringify(this.TableData));
+		return JSON.parse(JSON.stringify(this.tableData));
 	} catch (error) {
 		throw new Error("error caught @ getData(): " + error.toString());
 	}
