@@ -1,12 +1,12 @@
 function InteractiveTable(id) {
 
-	this.identifier = id;
-	this.container = null;
-	this.tableData = [{ "key": "value" }];
-	this.originalTableData = null;
-	this.haveSelection = false;
-	this.edited = false;
-	this.tableDefaultSettings = {
+	var identifier = id;
+	var container = null;
+	var tableData = [{ "key": "value" }];
+	var originalTableData = null;
+	var haveSelection = false;
+	var edited = false;
+	var tableDefaultSettings = {
 		"label": "",
 		"columns": [
 			{
@@ -71,768 +71,782 @@ function InteractiveTable(id) {
 			"background-color": "#f9f9f9"
 		}
 	};
-	this.tableSettings = JSON.parse(JSON.stringify(this.tableDefaultSettings));
-}
+	var tableSettings = JSON.parse(JSON.stringify(tableDefaultSettings));
 
-InteractiveTable.prototype.toStyleString = function (obj) {
-	try {
-		var output = '';
-		for (const [key, value] of Object.entries(obj || {})) {
-			output += key + ':' + value + ';';
-		}
-		return output;
-	} catch (error) {
-		throw new Error("error caught @ toStyleString(" + obj + "): " + error);
+	getTableSettings = function () {
+		return tableSettings;
 	}
-}
 
-InteractiveTable.prototype.setData = function (data) {
-	try {
-		this.edited = false;
-		data.forEach((row, index) => {
-			row["row-index"] = index + 1;
-			row["row-filtered"] = true;
-			row["row-selected"] = false;
-			row["row-edited"] = false;
-		});
-		this.tableData = data;
-		this.originalTableData = JSON.parse(JSON.stringify(data));
-		return this;
-	} catch (error) {
-		throw new Error("error caught @ setData(" + data + "): " + error);
-	}
-}
-
-InteractiveTable.prototype.resetData = function (data) {
-	try {
-		this.edited = false;
-		this.tableData = JSON.parse(JSON.stringify(this.originalTableData));
-		return this;
-	} catch (error) {
-		throw new Error("error caught @ resetData(" + data + "): " + error);
-	}
-}
-
-InteractiveTable.prototype.setTableSettings = function (newSettings) {
-	try {
-		this.tableSettings = { ...this.tableSettings, ...newSettings };
-
-		this.tableSettings['headersStyle'] = { ...this.tableDefaultSettings['headersStyle'], ...newSettings['headersStyle'] };
-		this.tableSettings['filtersStyle'] = { ...this.tableDefaultSettings['filtersStyle'], ...newSettings['filtersStyle'] };
-		this.tableSettings['rowsStyle'] = { ...this.tableDefaultSettings['rowsStyle'], ...newSettings['rowsStyle'] };
-		this.tableSettings['oddRowsStyle'] = { ...this.tableDefaultSettings['oddRowsStyle'], ...newSettings['oddRowsStyle'] };
-		this.tableSettings['evenRowsStyle'] = { ...this.tableDefaultSettings['evenRowsStyle'], ...newSettings['evenRowsStyle'] };
-
-		return this;
-	} catch (error) {
-		throw new Error("error caught @ setTableSettings(" + newSettings + "): " + error);
-	}
-}
-
-InteractiveTable.prototype.printCheckBox = function (row) {
-	try {
-		if (!this.haveSelection) {
-			this.haveSelection = true;
-		}
-		return '<input type="checkbox" onclick="' + this.identifier + (!this.tableSettings['multiSelect'] ? '.setAllSelected(false)' : '') + '.setSelected(' + row['row-index'] + ', this.checked).refreshTable();" ' + (row['row-selected'] ? 'checked' : '') + '/>';
-	} catch (error) {
-		throw new Error("error caught @ printCheckBox(" + row + "): " + error);
-	}
-}
-
-InteractiveTable.prototype.setSelected = function (index, selected) {
-	try {
-		this.tableData = this.tableData.map(row => row['row-index'] === index ? { ...row, 'row-selected': selected } : row)
-		return this;
-	} catch (error) {
-		throw new Error("error caught @ setSelected(" + index + ", " + selected + "): " + error);
-	}
-}
-
-InteractiveTable.prototype.setAllSelected = function (selected) {
-	try {
-		this.tableData = this.tableData.map(row => ({ ...row, 'row-selected': selected }));
-		return this;
-	} catch (error) {
-		throw new Error("error caught @ setAllSelected(" + selected + "): " + error);
-	}
-}
-
-InteractiveTable.prototype.setAllFilteredSelected = function (selected) {
-	try {
-		this.tableData = this.tableData.map(row => row['row-filtered'] ? { ...row, 'row-selected': selected } : row);
-		return this;
-	} catch (error) {
-		throw new Error("error caught @ setAllFilteredSelected(" + selected + "): " + error);
-	}
-}
-
-/**
- * remove all properties with keys starting with 'row-' from input array
- * @param {*} arr array of objects
- * @returns 
- */
-InteractiveTable.prototype.cleanKeys = function (arr) {
-	try {
-		output = this.removeKeys(arr, ['row-%']);
-		return output;
-	} catch (error) {
-		throw new Error("error caught @ removeKeys(" + JSON.stringify(arr) + ", " + JSON.stringify(keys) + "): " + error.toString());
-	}
-}
-
-/**
- * remove all properties with keys specified in the parameter 'keys' from input array 'arr'
- * @param {*} arr array of objects
- * @param {*} keys [String] or [String][]
- * @returns 
- */
-InteractiveTable.prototype.removeKeys = function (arr, keys) {
-	try {
-		let output = JSON.parse(JSON.stringify(arr));
-		if (typeof keys === 'string') {
-			if (keys.endsWith('%')) {
-				let prefix = keys.slice(0, -1);
-				for (let i = 0; i < output.length; i++) {
-					for (let key in output[i]) {
-						if (key.startsWith(prefix)) {
-							delete output[i][key];
-						}
-					}
-				}
-			} else {
-				for (let i = 0; i < output.length; i++) {
-					delete output[i][keys];
-				}
+	toStyleString = function (obj) {
+		try {
+			var output = '';
+			for (let [key, value] of Object.entries(obj || {})) {
+				output += key + ':' + value + ';';
 			}
-		} else if (Array.isArray(keys)) {
-			for (let i = 0; i < output.length; i++) {
-				for (let j = 0; j < keys.length; j++) {
-					if (keys[j].endsWith('%')) {
-						let prefix = keys[j].slice(0, -1);
+			return output;
+		} catch (error) {
+			throw new Error("error caught @ toStyleString(" + obj + "): " + error);
+		}
+	}
+
+	var setData = function (data) {
+		try {
+			edited = false;
+			data.forEach((row, index) => {
+				row["row-index"] = index + 1;
+				row["row-filtered"] = true;
+				row["row-selected"] = false;
+				row["row-edited"] = false;
+			});
+			tableData = data;
+			originalTableData = JSON.parse(JSON.stringify(data));
+			return this;
+		} catch (error) {
+			throw new Error("error caught @ setData(" + data + "): " + error);
+		}
+	}
+
+	var resetData = function (data) {
+		try {
+			edited = false;
+			tableData = JSON.parse(JSON.stringify(originalTableData));
+			return this;
+		} catch (error) {
+			throw new Error("error caught @ resetData(" + data + "): " + error);
+		}
+	}
+
+	var setTableSettings = function (newSettings) {
+		try {
+			tableSettings = { ...tableSettings, ...newSettings };
+
+			tableSettings['headersStyle'] = { ...tableDefaultSettings['headersStyle'], ...newSettings['headersStyle'] };
+			tableSettings['filtersStyle'] = { ...tableDefaultSettings['filtersStyle'], ...newSettings['filtersStyle'] };
+			tableSettings['rowsStyle'] = { ...tableDefaultSettings['rowsStyle'], ...newSettings['rowsStyle'] };
+			tableSettings['oddRowsStyle'] = { ...tableDefaultSettings['oddRowsStyle'], ...newSettings['oddRowsStyle'] };
+			tableSettings['evenRowsStyle'] = { ...tableDefaultSettings['evenRowsStyle'], ...newSettings['evenRowsStyle'] };
+
+			return this;
+		} catch (error) {
+			throw new Error("error caught @ setTableSettings(" + newSettings + "): " + error);
+		}
+	}
+
+	var setSelected = function (index, selected) {
+		try {
+			tableData = tableData.map(row => row['row-index'] === index ? { ...row, 'row-selected': selected } : row)
+			return this;
+		} catch (error) {
+			throw new Error("error caught @ setSelected(" + index + ", " + selected + "): " + error);
+		}
+	}
+
+	var setAllSelected = function (selected) {
+		try {
+			tableData = tableData.map(row => ({ ...row, 'row-selected': selected }));
+			return this;
+		} catch (error) {
+			throw new Error("error caught @ setAllSelected(" + selected + "): " + error);
+		}
+	}
+
+	var setAllFilteredSelected = function (selected) {
+		try {
+			tableData = tableData.map(row => row['row-filtered'] ? { ...row, 'row-selected': selected } : row);
+			return this;
+		} catch (error) {
+			throw new Error("error caught @ setAllFilteredSelected(" + selected + "): " + error);
+		}
+	}
+
+	/**
+	 * remove all properties with keys starting with 'row-' from input array
+	 * @param {*} arr array of objects
+	 * @returns 
+	 */
+	var cleanKeys = function (arr) {
+		try {
+			output = removeKeys(arr, ['row-%']);
+			return output;
+		} catch (error) {
+			throw new Error("error caught @ removeKeys(" + JSON.stringify(arr) + ", " + JSON.stringify(keys) + "): " + error.toString());
+		}
+	}
+
+	/**
+	 * remove all properties with keys specified in the parameter 'keys' from input array 'arr'
+	 * @param {*} arr array of objects
+	 * @param {*} keys [String] or [String][]
+	 * @returns 
+	 */
+	var removeKeys = function (arr, keys) {
+		try {
+			let output = JSON.parse(JSON.stringify(arr));
+			if (typeof keys === 'string') {
+				if (keys.endsWith('%')) {
+					let prefix = keys.slice(0, -1);
+					for (let i = 0; i < output.length; i++) {
 						for (let key in output[i]) {
 							if (key.startsWith(prefix)) {
 								delete output[i][key];
 							}
 						}
-					} else {
-						delete output[i][keys[j]];
+					}
+				} else {
+					for (let i = 0; i < output.length; i++) {
+						delete output[i][keys];
 					}
 				}
+			} else if (Array.isArray(keys)) {
+				for (let i = 0; i < output.length; i++) {
+					for (let j = 0; j < keys.length; j++) {
+						if (keys[j].endsWith('%')) {
+							let prefix = keys[j].slice(0, -1);
+							for (let key in output[i]) {
+								if (key.startsWith(prefix)) {
+									delete output[i][key];
+								}
+							}
+						} else {
+							delete output[i][keys[j]];
+						}
+					}
+				}
+			} else {
+				throw new Error("keys argument must be a string or an array of strings");
 			}
-		} else {
-			throw new Error("keys argument must be a string or an array of strings");
+			return output;
+		} catch (error) {
+			throw new Error("error caught @ removeKeys(" + JSON.stringify(arr) + ", " + JSON.stringify(keys) + "): " + error.toString());
 		}
-		return output;
-	} catch (error) {
-		throw new Error("error caught @ removeKeys(" + JSON.stringify(arr) + ", " + JSON.stringify(keys) + "): " + error.toString());
 	}
-}
 
-InteractiveTable.prototype.deepFilter = function (arr, predicate) {
-	try {
-		const filteredArr = [];
-		for (const obj of arr) {
-			if (predicate(obj)) {
-				filteredArr.push(JSON.parse(JSON.stringify(obj)));
+	var deepFilter = function (arr, predicate) {
+		try {
+			let filteredArr = [];
+			for (let obj of arr) {
+				if (predicate(obj)) {
+					filteredArr.push(JSON.parse(JSON.stringify(obj)));
+				}
 			}
+			return filteredArr;
+		} catch (error) {
+			throw new Error("error caught @ deepFilter(" + arr + ", " + predicate + "): " + error);
 		}
-		return filteredArr;
-	} catch (error) {
-		throw new Error("error caught @ deepFilter(" + arr + ", " + predicate + "): " + error);
 	}
-}
 
-InteractiveTable.prototype.setEdited = function (arr) {
-	try {
-		arr = (arr || this.tableData);
-		for (let i = 0; i < arr.length; i++) {
-			const row = arr[i];
-			const oriRow = this.originalTableData.find(origDataRow => origDataRow['row-index'] === row['row-index']);
-			this.edited = false;
-			let isEdited = false;
-			for (const key in row) {
-				if (!key.startsWith('row-')) {
-					if (row[key] !== oriRow[key]) {
-						isEdited = true;
+	var setEdited = function (arr) {
+		try {
+			arr = (arr || tableData);
+			for (let i = 0; i < arr.length; i++) {
+				let row = arr[i];
+				let oriRow = originalTableData.find(origDataRow => origDataRow['row-index'] === row['row-index']);
+				edited = false;
+				let isEdited = false;
+				for (let key in row) {
+					if (!key.startsWith('row-')) {
+						if (row[key] !== oriRow[key]) {
+							isEdited = true;
+							break;
+						}
+					}
+				}
+				row['row-edited'] = isEdited;
+				edited = !(edited && isEdited);
+			}
+			return this;
+		} catch (error) {
+			throw new Error("error caught @ setEdited(): " + error.toString());
+		}
+	}
+
+	var getData = function () {
+		try {
+			return JSON.parse(JSON.stringify(tableData));
+		} catch (error) {
+			throw new Error("error caught @ getData(): " + error.toString());
+		}
+	}
+
+	var getSelected = function (arr) {
+		try {
+			arr = (arr || tableData);
+			let output = deepFilter(arr, row => row['row-selected']);
+			return output;
+		} catch (error) {
+			throw new Error("error caught @ getSelected(): " + error.toString());
+		}
+	}
+
+	var getFiltered = function (arr) {
+		try {
+			arr = (arr || tableData);
+			let output = deepFilter(arr, row => row['row-filtered']);
+			return output;
+		} catch (error) {
+			throw new Error("error caught @ getFiltered(): " + error.toString());
+		}
+	}
+
+	var getEdited = function (arr) {
+		try {
+			arr = (arr || tableData);
+			setEdited(arr);
+			let output = deepFilter(arr, row => row['row-edited']);
+			return output;
+		} catch (error) {
+			throw new Error("error caught @ getedited(): " + error.toString());
+		}
+	}
+
+	var sortAsOriginal = function () {
+		try {
+			tableData.sort((a, b) => a['row-index'] - b['row-index']);
+			return this;
+		} catch (error) {
+			throw new Error("error caught @ sortAsOriginal(): " + error);
+		}
+	}
+
+	var filterRows = function () {
+		try {
+			tableData.forEach((row) => {
+				let isFiltered = true;
+				for (let col of tableSettings['columns']) {
+					let matching = match((row[col['data']] || '').toString(), (col['filter'] ? col['filter'] : ''), false);
+					if (!matching) {
+						isFiltered = false;
 						break;
 					}
 				}
-			}
-			row['row-edited'] = isEdited;
-			this.edited = !(this.edited && isEdited);
+				row["row-filtered"] = isFiltered;
+			});
+			return this;
+		} catch (error) {
+			throw new Error("error caught @ filterRows(): " + error);
 		}
+	}
+
+	var setSorting = function (data, order) {
+		tableSettings['sortedBy'] = data;
+		tableSettings['ascending'] = order;
 		return this;
-	} catch (error) {
-		throw new Error("error caught @ setEdited(): " + error.toString());
 	}
-}
 
-InteractiveTable.prototype.getData = function () {
-	try {
-		return JSON.parse(JSON.stringify(this.tableData));
-	} catch (error) {
-		throw new Error("error caught @ getData(): " + error.toString());
-	}
-}
-
-InteractiveTable.prototype.getSelected = function (arr) {
-	try {
-		arr = (arr || this.tableData);
-		let output = this.deepFilter(arr, row => row['row-selected']);
-		return output;
-	} catch (error) {
-		throw new Error("error caught @ getSelected(): " + error.toString());
-	}
-}
-
-InteractiveTable.prototype.getFiltered = function (arr) {
-	try {
-		arr = (arr || this.tableData);
-		let output = this.deepFilter(arr, row => row['row-filtered']);
-		return output;
-	} catch (error) {
-		throw new Error("error caught @ getFiltered(): " + error.toString());
-	}
-}
-
-InteractiveTable.prototype.getEdited = function (arr) {
-	try {
-		arr = (arr || this.tableData);
-		this.setEdited(arr);
-		const output = this.deepFilter(arr, row => row['row-edited']);
-		return output;
-	} catch (error) {
-		throw new Error("error caught @ getedited(): " + error.toString());
-	}
-}
-
-InteractiveTable.prototype.sortAsOriginal = function () {
-	try {
-		this.tableData.sort((a, b) => a['row-index'] - b['row-index']);
-		return this;
-	} catch (error) {
-		throw new Error("error caught @ sortAsOriginal(): " + error);
-	}
-}
-
-InteractiveTable.prototype.filterRows = function () {
-	try {
-		this.tableData.forEach((row) => {
-			let isFiltered = true;
-			for (const col of this.tableSettings['columns']) {
-				let matching = this.match((row[col['data']] || '').toString(), (col['filter'] ? col['filter'] : ''), false);
-				if (!matching) {
-					isFiltered = false;
-					break;
+	var sortRows = function () {
+		try {
+			let data = tableSettings['sortedBy'];
+			let order = tableSettings['ascending'];
+			let sortedData = tableData.sort((a, b) => {
+				let aValue = a[data] || '';
+				let bValue = b[data] || '';
+				if (typeof aValue === 'boolean' || typeof bValue === 'boolean') {
+					if (aValue === bValue) {
+						return 0;
+					} else if (aValue && !bValue) {
+						return order ? -1 : 1;
+					} else {
+						return order ? 1 : -1;
+					}
+				} else if (isDateString(aValue) && isDateString(bValue)) {
+					let aNumber = parseDate(aValue);
+					let bNumber = parseDate(bValue);
+					if (!isNaN(aNumber) && !isNaN(bNumber)) {
+						return order ? aNumber - bNumber : bNumber - aNumber;
+					}
+				} else if (isNumberString(aValue) && isNumberString(bValue)) {
+					let aNumber = parseFloat(aValue);
+					let bNumber = parseFloat(bValue);
+					if (!isNaN(aNumber) && !isNaN(bNumber)) {
+						return order ? aNumber - bNumber : bNumber - aNumber;
+					}
+				} else if (isIntegerString(aValue) && isIntegerString(bValue)) {
+					let aInteger = parseInt(aValue);
+					let bInteger = parseInt(bValue);
+					if (!isNaN(aInteger) && !isNaN(bInteger)) {
+						return order ? aInteger - bInteger : bInteger - aInteger;
+					}
+				} else if (typeof aValue === 'string' && typeof bValue === 'string') {
+					return order ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
 				}
-			}
-			row["row-filtered"] = isFiltered;
-		});
-		return this;
-	} catch (error) {
-		throw new Error("error caught @ filterRows(): " + error);
-	}
-}
-
-InteractiveTable.prototype.setSorting = function (data, order) {
-	this.tableSettings['sortedBy'] = data;
-	this.tableSettings['ascending'] = order;
-	return this;
-}
-
-InteractiveTable.prototype.sortRows = function () {
-	try {
-		let data = this.tableSettings['sortedBy'];
-		let order = this.tableSettings['ascending'];
-		const sortedData = this.tableData.sort((a, b) => {
-			const aValue = a[data] || '';
-			const bValue = b[data] || '';
-			if (typeof aValue === 'boolean' || typeof bValue === 'boolean') {
-				if (aValue === bValue) {
-					return 0;
-				} else if (aValue && !bValue) {
-					return order ? -1 : 1;
-				} else {
-					return order ? 1 : -1;
-				}
-			} else if (this.isDateString(aValue) && this.isDateString(bValue)) {
-				const aNumber = this.parseDate(aValue);
-				const bNumber = this.parseDate(bValue);
-				if (!isNaN(aNumber) && !isNaN(bNumber)) {
-					return order ? aNumber - bNumber : bNumber - aNumber;
-				}
-			} else if (this.isNumberString(aValue) && this.isNumberString(bValue)) {
-				const aNumber = parseFloat(aValue);
-				const bNumber = parseFloat(bValue);
-				if (!isNaN(aNumber) && !isNaN(bNumber)) {
-					return order ? aNumber - bNumber : bNumber - aNumber;
-				}
-			} else if (this.isIntegerString(aValue) && this.isIntegerString(bValue)) {
-				const aInteger = parseInt(aValue);
-				const bInteger = parseInt(bValue);
-				if (!isNaN(aInteger) && !isNaN(bInteger)) {
-					return order ? aInteger - bInteger : bInteger - aInteger;
-				}
-			} else if (typeof aValue === 'string' && typeof bValue === 'string') {
-				return order ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
-			}
-			return 0;
-		});
-		this.tableData = sortedData;
-		return this;
-	} catch (error) {
-		throw new Error("error caught @ sort(" + data + ", " + order + "): " + error);
-	}
-}
-
-InteractiveTable.prototype.isDateString = function (value) {
-	try {
-		return /^(\d{2})[-\/](\d{2})[-\/](\d{4})$|^(\d{4})[-\/](\d{2})[-\/](\d{2})$|^(\d{2})[-\/](\d{2})[-\/](\d{4}) (\d{2}):(\d{2}):(\d{2})$/.test(value);
-	} catch (error) {
-		throw new Error("error caught @ isDateString(" + value + "): " + error);
-	}
-}
-
-InteractiveTable.prototype.isNumberString = function (value) {
-	try {
-		return /^(\d+|\d+\.\d+|\.\d+)$/.test(value);
-	} catch (error) {
-		throw new Error("error caught @ isNumberString(" + value + "): " + error);
-	}
-}
-
-InteractiveTable.prototype.isIntegerString = function (value) {
-	try {
-		return /^(\d+)$/.test(value);
-	} catch (error) {
-		throw new Error("error caught @ isIntegerString(" + value + "): " + error);
-	}
-}
-
-InteractiveTable.prototype.parseDate = function (value) {
-	try {
-		let match = null;
-		let output = null;
-		if (/^(\d{2})[-\/](\d{2})[-\/](\d{4})$/.test(value)) {
-			match = /^(\d{2})[-\/](\d{2})[-\/](\d{4})$/.exec(value);
-			if (match) {
-				output = new Date(match[3] + '-' + match[2] + '-' + match[1]).getTime();
-			}
-		} else if (/^(\d{4})[-\/](\d{2})[-\/](\d{2})$/.test(value)) {
-			match = /^(\d{4})[-\/](\d{2})[-\/](\d{2})$/.exec(value);
-			if (match) {
-				output = new Date(match[1] + '-' + match[2] + '-' + match[3]).getTime();
-			}
-		} else if (/^(\d{2})[-\/](\d{2})[-\/](\d{4}) (\d{2}):(\d{2}):(\d{2})$/.test(value)) {
-			match = /^(\d{2})[-\/](\d{2})[-\/](\d{4}) (\d{2}):(\d{2}):(\d{2})$/.exec(value);
-			if (match) {
-				output = new Date(match[3] + '-' + match[2] + '-' + match[1] + 'T' + match[4] + ':' + match[5] + ':' + match[6]).getTime();
-			}
+				return 0;
+			});
+			tableData = sortedData;
+			return this;
+		} catch (error) {
+			throw new Error("error caught @ sort(" + data + ", " + order + "): " + error);
 		}
-		return output;
-	} catch (error) {
-		throw new Error("error caught @ parseDate(" + value + "): " + error);
 	}
-}
 
-InteractiveTable.prototype.setStart = function (start) {
-	try {
-		let rowNumber = parseInt(start);
-		if (!Number.isNaN(rowNumber)) {
-			this.tableSettings = {
-				...this.tableSettings
-				, start: Math.max(
-					Math.min(
-						rowNumber,
-						this.tableSettings['end']
-					),
-					Math.max(
-						(this.getFiltered().length === 0 ? 0 : 1),
-						this.tableSettings['end'] - this.tableSettings['maxRows'] + 1
+	var isDateString = function (value) {
+		try {
+			return /^(\d{2})[-\/](\d{2})[-\/](\d{4})$|^(\d{4})[-\/](\d{2})[-\/](\d{2})$|^(\d{2})[-\/](\d{2})[-\/](\d{4}) (\d{2}):(\d{2}):(\d{2})$/.test(value);
+		} catch (error) {
+			throw new Error("error caught @ isDateString(" + value + "): " + error);
+		}
+	}
+
+	var isNumberString = function (value) {
+		try {
+			return /^(\d+|\d+\.\d+|\.\d+)$/.test(value);
+		} catch (error) {
+			throw new Error("error caught @ isNumberString(" + value + "): " + error);
+		}
+	}
+
+	var isIntegerString = function (value) {
+		try {
+			return /^(\d+)$/.test(value);
+		} catch (error) {
+			throw new Error("error caught @ isIntegerString(" + value + "): " + error);
+		}
+	}
+
+	var parseDate = function (value) {
+		try {
+			let match = null;
+			let output = null;
+			if (/^(\d{2})[-\/](\d{2})[-\/](\d{4})$/.test(value)) {
+				match = /^(\d{2})[-\/](\d{2})[-\/](\d{4})$/.exec(value);
+				if (match) {
+					output = new Date(match[3] + '-' + match[2] + '-' + match[1]).getTime();
+				}
+			} else if (/^(\d{4})[-\/](\d{2})[-\/](\d{2})$/.test(value)) {
+				match = /^(\d{4})[-\/](\d{2})[-\/](\d{2})$/.exec(value);
+				if (match) {
+					output = new Date(match[1] + '-' + match[2] + '-' + match[3]).getTime();
+				}
+			} else if (/^(\d{2})[-\/](\d{2})[-\/](\d{4}) (\d{2}):(\d{2}):(\d{2})$/.test(value)) {
+				match = /^(\d{2})[-\/](\d{2})[-\/](\d{4}) (\d{2}):(\d{2}):(\d{2})$/.exec(value);
+				if (match) {
+					output = new Date(match[3] + '-' + match[2] + '-' + match[1] + 'T' + match[4] + ':' + match[5] + ':' + match[6]).getTime();
+				}
+			}
+			return output;
+		} catch (error) {
+			throw new Error("error caught @ parseDate(" + value + "): " + error);
+		}
+	}
+
+	var setStart = function (start) {
+		try {
+			let rowNumber = parseInt(start);
+			if (!Number.isNaN(rowNumber)) {
+				tableSettings = {
+					...tableSettings
+					, start: Math.max(
+						Math.min(
+							rowNumber,
+							tableSettings['end']
+						),
+						Math.max(
+							(getFiltered().length === 0 ? 0 : 1),
+							tableSettings['end'] - tableSettings['maxRows'] + 1
+						)
 					)
-				)
-			};
+				};
+			}
+			return this;
+		} catch (err) {
+			throw new Error("error caught @ setStart(" + start + ") - " + err);
 		}
-		return this;
-	} catch (err) {
-		throw new Error("error caught @ setStart(" + start + ") - " + err);
 	}
-}
 
-InteractiveTable.prototype.setEnd = function (end) {
-	try {
-		let rowNumber = parseInt(end);
-		if (!Number.isNaN(rowNumber)) {
-			this.tableSettings = {
-				...this.tableSettings
-				, end: Math.min(
-					Math.max(
-						rowNumber,
-						this.tableSettings['start']
-					),
-					Math.min(
-						this.getFiltered().length,
-						this.tableSettings['start'] + this.tableSettings['maxRows'] - 1
+	var setEnd = function (end) {
+		try {
+			let rowNumber = parseInt(end);
+			if (!Number.isNaN(rowNumber)) {
+				tableSettings = {
+					...tableSettings
+					, end: Math.min(
+						Math.max(
+							rowNumber,
+							tableSettings['start']
+						),
+						Math.min(
+							getFiltered().length,
+							tableSettings['start'] + tableSettings['maxRows'] - 1
+						)
 					)
-				)
-			};
+				};
+			}
+			return this;
+		} catch (err) {
+			throw new Error("error caught @ setEnd(" + end + ") - " + err);
 		}
-		return this;
-	} catch (err) {
-		throw new Error("error caught @ setEnd(" + end + ") - " + err);
 	}
-}
 
-InteractiveTable.prototype.toBegining = function () {
-	try {
-		const length = this.tableSettings['end'] - this.tableSettings['start'] + 1;
-		this.tableSettings['start'] = this.getFiltered().length === 0 ? 0 : 1;
-		this.tableSettings['end'] = Math.min(this.getFiltered().length, this.tableSettings['start'] + length - 1);
-		return this;
-	} catch (err) {
-		throw new Error("error caught @ toBegining() - " + err);
-	}
-}
-
-InteractiveTable.prototype.priviousPage = function () {
-	try {
-		const length = this.tableSettings['end'] - this.tableSettings['start'] + 1;
-		this.tableSettings['start'] = Math.max(this.getFiltered().length === 0 ? 0 : 1, this.tableSettings['start'] - length);
-		this.tableSettings['end'] = Math.min(this.tableData.length, this.tableSettings['start'] + length - 1);
-		return this;
-	} catch (err) {
-		throw new Error("error caught @ priviousPage() - " + err);
-	}
-}
-
-InteractiveTable.prototype.nextPage = function () {
-	try {
-		const length = this.tableSettings['end'] - this.tableSettings['start'] + 1;
-		this.tableSettings['end'] = Math.min(this.getFiltered().length, this.tableSettings['end'] + length);
-		this.tableSettings['start'] = Math.max(1, this.tableSettings['end'] - length + 1);
-		return this;
-	} catch (err) {
-		throw new Error("error caught @ nextPage() - " + err);
-	}
-}
-
-InteractiveTable.prototype.toEnding = function () {
-	try {
-		const length = this.tableSettings['end'] - this.tableSettings['start'] + 1;
-		this.tableSettings['end'] = this.getFiltered().length;
-		this.tableSettings['start'] = Math.max(1, this.tableSettings['end'] - length + 1);
-		return this;
-	} catch (err) {
-		throw new Error("error caught @ priviousPage() - " + err);
-	}
-}
-
-InteractiveTable.prototype.printSelectingGroup = function () {
-	try {
-		if (this.tableSettings['multiSelect'] == true && this.haveSelection) {
-			const selectedRows = this.tableData.filter(row => row['row-selected']);
-			const noOfSelected = selectedRows.length;
-			const selectAllButton = '<button class="' + this.tableSettings['buttonClass'] + '" onclick="' + this.identifier + '.setAllFilteredSelected(true).refreshTable()">' + this.tableSettings.selectAllFiltered + '</button>';
-			const unselectAllButton = '<button class="' + this.tableSettings['buttonClass'] + '" onclick="' + this.identifier + '.setAllFilteredSelected(false).refreshTable()">' + this.tableSettings.unselectAllFiltered + '</button>';
-			return '<div style="display:flex;flex-flow:row wrap;justify-content:flex-start;align-items:center;column-gap:3px;">' + this.tableSettings.noOfSelected + noOfSelected + ' <div style="display:flex;flex-flow:row wrap;justify-content:flex-start;align-items:center;column-gap:3px;">' + selectAllButton + unselectAllButton + '</div></div>';
-		} else {
-			return '';
+	var toBegining = function () {
+		try {
+			let length = tableSettings['end'] - tableSettings['start'] + 1;
+			tableSettings['start'] = getFiltered().length === 0 ? 0 : 1;
+			tableSettings['end'] = Math.min(getFiltered().length, tableSettings['start'] + length - 1);
+			return this;
+		} catch (err) {
+			throw new Error("error caught @ toBegining() - " + err);
 		}
-	} catch (err) {
-		throw new Error("error caught @ printSelectingGroup() - " + err);
 	}
-}
 
-InteractiveTable.prototype.printResetFiltersButton = function () {
-	try {
-		return '<button class="' + this.tableSettings['buttonClass'] + '" onclick="' + this.identifier + '.resetFilters().filterRows().resetPageNumbers().refreshTable();">' + this.tableSettings.resetFilters + '</button>';
-	} catch (err) {
-		throw new Error("error caught @ printResetFiltersButton() - " + err);
+	var priviousPage = function () {
+		try {
+			let length = tableSettings['end'] - tableSettings['start'] + 1;
+			tableSettings['start'] = Math.max(getFiltered().length === 0 ? 0 : 1, tableSettings['start'] - length);
+			tableSettings['end'] = Math.min(tableData.length, tableSettings['start'] + length - 1);
+			return this;
+		} catch (err) {
+			throw new Error("error caught @ priviousPage() - " + err);
+		}
 	}
-}
 
-InteractiveTable.prototype.printResetEditsButton = function () {
-	try {
-		return this.edited ? '<button class="' + this.tableSettings['buttonClass'] + '" onclick="' + this.identifier + '.resetData().filterRows().resetPageNumbers().refreshTable();">' + this.tableSettings.resetEdits + '</button>' : '';
-	} catch (err) {
-		throw new Error("error caught @ printResetEditsButton() - " + err);
+	var nextPage = function () {
+		try {
+			let length = tableSettings['end'] - tableSettings['start'] + 1;
+			tableSettings['end'] = Math.min(getFiltered().length, tableSettings['end'] + length);
+			tableSettings['start'] = Math.max(1, tableSettings['end'] - length + 1);
+			return this;
+		} catch (err) {
+			throw new Error("error caught @ nextPage() - " + err);
+		}
 	}
-}
 
-InteractiveTable.prototype.printPaginationGroup = function () {
-	try {
-		const startInput = '<input type="text" style=\'text-align:center; padding: 3px 8px; width: ' + (Math.max(1, Math.ceil(Math.log10(this.tableData.length))) * 8 + 20) + 'px;\' value="' + this.tableSettings['start'] + '" onchange="' + this.identifier + '.setStart(this.value).refreshTable()" />';
-		const endInput = '<input type="text" style=\'text-align:center; padding: 3px 8px; width: ' + (Math.max(1, Math.ceil(Math.log10(this.tableData.length))) * 8 + 20) + 'px;\' value="' + this.tableSettings['end'] + '" onchange="' + this.identifier + '.setEnd(this.value).refreshTable()" />';
-		const totalRows = this.getFiltered().length;
-		const toBeginingButton = '<button class="' + this.tableSettings['buttonClass'] + '" onclick="' + this.identifier + '.toBegining().refreshTable();">' + this.tableSettings['toBegining'] + '</button>';
-		const previousButton = '<button style="margin-left:5px;" class="' + this.tableSettings['buttonClass'] + '" onclick="' + this.identifier + '.priviousPage().refreshTable();">' + this.tableSettings['previousPage'] + '</button>';
-		const nextButton = '<button style="margin-right:5px;" class="' + this.tableSettings['buttonClass'] + '" onclick="' + this.identifier + '.nextPage().refreshTable();">' + this.tableSettings['nextPage'] + '</button>';
-		const toEndingButton = '<button class="' + this.tableSettings['buttonClass'] + '" onclick="' + this.identifier + '.toEnding().refreshTable();">' + this.tableSettings['toEnding'] + '</button>';
-		return '<div style="' + this.tableSettings['paginationGroupStyle'] + '"><div style="width:100%;display:flex;flex-flow:row wrap;justify-content:center;align-items:center;column-gap:3px;"><div>' + toBeginingButton + previousButton + '</div><div>' + startInput + '<span style=\'margin: 0px 5px;\'>-</span>' + endInput + '<span style=\'margin: 0px 5px;\'>/</span>' + totalRows + '</div><div>' + nextButton + toEndingButton + '</div></div></div>';
-	} catch (err) {
-		throw new Error("error caught @ printPaginationGroup() - " + err);
+	var toEnding = function () {
+		try {
+			let length = tableSettings['end'] - tableSettings['start'] + 1;
+			tableSettings['end'] = getFiltered().length;
+			tableSettings['start'] = Math.max(1, tableSettings['end'] - length + 1);
+			return this;
+		} catch (err) {
+			throw new Error("error caught @ priviousPage() - " + err);
+		}
 	}
-}
 
-InteractiveTable.prototype.setFilter = function (index, value) {
-	try {
-		this.tableSettings['columns'][index]['filter'] = value;
-		return this;
-	} catch (err) {
-		throw new Error("error caught @ setFilter(" + index + ", " + value + ") - " + err);
+	var printCheckBox = function (row) {
+		try {
+			if (!haveSelection) {
+				haveSelection = true;
+			}
+			return '<input type="checkbox" onclick="' + identifier + (!tableSettings['multiSelect'] ? '.setAllSelected(false)' : '') + '.setSelected(' + row['row-index'] + ', checked).refreshTable();" ' + (row['row-selected'] ? 'checked' : '') + '/>';
+		} catch (error) {
+			throw new Error("error caught @ printCheckBox(" + row + "): " + error);
+		}
 	}
-}
 
-InteractiveTable.prototype.resetFilters = function () {
-	try {
-		this.tableSettings['columns'].forEach((col) => {
-			col['filter'] = "";
-		});
-		return this;
-	} catch (err) {
-		throw new Error("error caught @ resetFilters() - " + err);
-	}
-}
-
-InteractiveTable.prototype.resetPageNumbers = function () {
-	try {
-		const length = this.tableSettings['end'] - this.tableSettings['start'] + 1;
-		this.setStart(this.getFiltered().length === 0 ? 0 : 1);
-		this.setEnd(Math.max(length, this.tableSettings['defaultEnd']));
-		return this;
-	} catch (err) {
-		throw new Error("error caught @ resetPageNumbers() - " + err);
-	}
-}
-
-InteractiveTable.prototype.match = function (text, matchingText, caseSensitive) {
-	let match = false;
-
-	try {
-		if (text === null && matchingText !== '') {
-			return false;
-		} else if (matchingText.trim() === "") {
-			match = true;
-		} else {
-			const regex = matchingText.trim().startsWith("regex:");
-
-			if (regex) {
-				const regexPattern = new RegExp(matchingText.trim().substring(6));
-				match = regexPattern.test(text);
+	var printSelectingGroup = function () {
+		try {
+			if (tableSettings['multiSelect'] == true && haveSelection) {
+				let selectedRows = tableData.filter(row => row['row-selected']);
+				let noOfSelected = selectedRows.length;
+				let selectAllButton = '<button class="' + tableSettings['buttonClass'] + '" onclick="' + identifier + '.setAllFilteredSelected(true).refreshTable()">' + tableSettings.selectAllFiltered + '</button>';
+				let unselectAllButton = '<button class="' + tableSettings['buttonClass'] + '" onclick="' + identifier + '.setAllFilteredSelected(false).refreshTable()">' + tableSettings.unselectAllFiltered + '</button>';
+				return '<div style="display:flex;flex-flow:row wrap;justify-content:flex-start;align-items:center;column-gap:3px;">' + tableSettings.noOfSelected + noOfSelected + ' <div style="display:flex;flex-flow:row wrap;justify-content:flex-start;align-items:center;column-gap:3px;">' + selectAllButton + unselectAllButton + '</div></div>';
 			} else {
-				if (!caseSensitive) {
-					text = text.toUpperCase();
-					matchingText = matchingText.toUpperCase();
-				}
-
-				const values = [];
-				let isQuoteOpen = false;
-				let currentWord = "";
-
-				for (let i = 0; i < matchingText.length; i++) {
-					const char = matchingText[i];
-
-					if (!isQuoteOpen && (char === " " || char === "," || char === "+" || char === "\t")) {
-						if (currentWord !== "") {
-							values.push(currentWord);
-							currentWord = "";
-						}
-					} else if (char === "\"") {
-						isQuoteOpen = !isQuoteOpen;
-
-						if (!isQuoteOpen && currentWord !== "") {
-							values.push(currentWord);
-							currentWord = "";
-						}
-					} else {
-						currentWord += char;
-					}
-				}
-
-				if (currentWord !== "") {
-					values.push(currentWord);
-				}
-
-				const exclusionSet = [];
-				const inclusionSet = [];
-
-				for (const value of values) {
-					if (value.startsWith("-")) {
-						exclusionSet.push(value.substring(1));
-					} else {
-						inclusionSet.push(value);
-					}
-				}
-
-				/*handle excludes*/
-				let exclusiveMatch = true;
-				for (const value of exclusionSet) {
-					exclusiveMatch = exclusiveMatch && text.indexOf(value) === -1;
-				}
-
-				/*handle includes*/
-				let inclusiveMatch = inclusionSet.length === 0;
-				for (const value of inclusionSet) {
-					inclusiveMatch = inclusiveMatch || text.indexOf(value) !== -1;
-				}
-
-				match = exclusiveMatch && inclusiveMatch;
+				return '';
 			}
+		} catch (err) {
+			throw new Error("error caught @ printSelectingGroup() - " + err);
 		}
-	} catch (e) {
-		throw new Error("error caught @ match(" + text + ", " + matchingText + ", " + (caseSensitive ? "true" : "false") + "): " + e);
 	}
 
-	return match;
-}
-
-InteractiveTable.prototype.editData = function (index, data, value) {
-	try {
-		let row = this.tableData.find((row) => {
-			return row['row-index'] === index;
-		});
-		if (row[data] !== value) {
-			if (row['ori-' + data] === undefined) {
-				row['ori-' + data] = row[data];
-			} else if (row['ori-' + data] === value) {
-				delete row['ori-' + data];
-			}
-			row[data] = value;
-			this.setEdited();
-			this.refreshTable();
+	var printResetFiltersButton = function () {
+		try {
+			return '<button class="' + tableSettings['buttonClass'] + '" onclick="' + identifier + '.resetFilters().filterRows().resetPageNumbers().refreshTable();">' + tableSettings.resetFilters + '</button>';
+		} catch (err) {
+			throw new Error("error caught @ printResetFiltersButton() - " + err);
 		}
-		return this;
-	} catch (err) {
-		throw new Error("error caught @ editData(" + index + ", " + data + ", " + value + "): " + err);
 	}
-}
 
-InteractiveTable.prototype.stringToAscii = function (str) {
-	try {
-		let ascii = "";
-		for (let i = 0; i < str.length; i++) {
-			let charCode = str.charCodeAt(i);
-			ascii += "&#" + charCode + ";";
+	var printResetEditsButton = function () {
+		try {
+			return edited ? '<button class="' + tableSettings['buttonClass'] + '" onclick="' + identifier + '.resetData().filterRows().resetPageNumbers().refreshTable();">' + tableSettings.resetEdits + '</button>' : '';
+		} catch (err) {
+			throw new Error("error caught @ printResetEditsButton() - " + err);
 		}
-		return ascii;
-	} catch (err) {
-		throw new Error("error caught @ stringToAscii(" + str + "): " + err);
 	}
-}
 
-InteractiveTable.prototype.printTable = function () {
-	try {
-		var html = "";
+	var printPaginationGroup = function () {
+		try {
+			let startInput = '<input type="text" style=\'text-align:center; padding: 3px 8px; width: ' + (Math.max(1, Math.ceil(Math.log10(tableData.length))) * 8 + 20) + 'px;\' value="' + tableSettings['start'] + '" onchange="' + identifier + '.setStart(value).refreshTable()" />';
+			let endInput = '<input type="text" style=\'text-align:center; padding: 3px 8px; width: ' + (Math.max(1, Math.ceil(Math.log10(tableData.length))) * 8 + 20) + 'px;\' value="' + tableSettings['end'] + '" onchange="' + identifier + '.setEnd(value).refreshTable()" />';
+			let totalRows = getFiltered().length;
+			let toBeginingButton = '<button class="' + tableSettings['buttonClass'] + '" onclick="' + identifier + '.toBegining().refreshTable();">' + tableSettings['toBegining'] + '</button>';
+			let previousButton = '<button style="margin-left:5px;" class="' + tableSettings['buttonClass'] + '" onclick="' + identifier + '.priviousPage().refreshTable();">' + tableSettings['previousPage'] + '</button>';
+			let nextButton = '<button style="margin-right:5px;" class="' + tableSettings['buttonClass'] + '" onclick="' + identifier + '.nextPage().refreshTable();">' + tableSettings['nextPage'] + '</button>';
+			let toEndingButton = '<button class="' + tableSettings['buttonClass'] + '" onclick="' + identifier + '.toEnding().refreshTable();">' + tableSettings['toEnding'] + '</button>';
+			return '<div style="' + tableSettings['paginationGroupStyle'] + '"><div style="width:100%;display:flex;flex-flow:row wrap;justify-content:center;align-items:center;column-gap:3px;"><div>' + toBeginingButton + previousButton + '</div><div>' + startInput + '<span style=\'margin: 0px 5px;\'>-</span>' + endInput + '<span style=\'margin: 0px 5px;\'>/</span>' + totalRows + '</div><div>' + nextButton + toEndingButton + '</div></div></div>';
+		} catch (err) {
+			throw new Error("error caught @ printPaginationGroup() - " + err);
+		}
+	}
 
-		this.sortRows();
-		this.filterRows();
+	var setFilter = function (index, value) {
+		try {
+			tableSettings['columns'][index]['filter'] = value;
+			return this;
+		} catch (err) {
+			throw new Error("error caught @ setFilter(" + index + ", " + value + ") - " + err);
+		}
+	}
 
-		html += "<table style='width:100%;height:min-content;border-collapse: collapse;'><tbody>";
+	var resetFilters = function () {
+		try {
+			tableSettings['columns'].forEach((col) => {
+				col['filter'] = "";
+			});
+			return this;
+		} catch (err) {
+			throw new Error("error caught @ resetFilters() - " + err);
+		}
+	}
 
-		/*headers*/
-		html += "<tr>";
-		this.tableSettings['columns'].forEach((col) => {
-			var headerStyle = { ...(this.tableSettings['headersStyle'] || {}), ...(col['headerStyle'] || {}) };
-			var headerHtml = '<div'
-				+ ' style="' + this.toStyleString(headerStyle) + '"'
-				+ ' class="sort-header ' + (this.tableSettings['sortedBy'] === col['data'] ? 'sorting' : '') + '"'
-				+ ' onclick="' + this.identifier + '.setSorting(\'' + col['data'] + '\', ' + (this.tableSettings['sortedBy'] === col['data'] ? !this.tableSettings['ascending'] : this.tableSettings['ascending']) + ').refreshTable()"'
-				+ '>'
-				+ '<div style="flex:1;"></div>'
-				+ col.header
-				+ (this.tableSettings['sortedBy'] === col['data'] ? (this.tableSettings['ascending'] ? '&#9650;' : '&#9660;') : '')
-				+ '<div style="flex:1;"></div>'
-				+ '</div>';
-			html += '<td style="padding:0px;">' + headerHtml + '</td>';
-		});
-		html += '</tr>';
+	var resetPageNumbers = function () {
+		try {
+			let length = tableSettings['end'] - tableSettings['start'] + 1;
+			setStart(getFiltered().length === 0 ? 0 : 1);
+			setEnd(Math.max(length, tableSettings['defaultEnd']));
+			return this;
+		} catch (err) {
+			throw new Error("error caught @ resetPageNumbers() - " + err);
+		}
+	}
 
-		/*filters*/
-		html += '<tr>';
-		this.tableSettings['columns'].forEach((col) => {
-			var filterStyle = this.toStyleString({ ...(this.tableSettings['filtersStyle'] || {}), ...(col['filterStyle'] || {}) });
-			var filterValue = col['filter'] || '';
-			var filterHtml = '<div'
-				+ ' style="' + filterStyle + '"'
-				+ ' onclick="let val = prompt(\'' + this.tableSettings['editFilter'] + '\',\'' + this.stringToAscii(filterValue) + '\'); if(val!=null){' + this.identifier + '.setFilter(' + this.tableSettings['columns'].indexOf(col) + ',val).filterRows().resetPageNumbers().refreshTable();}"'
-				+ '>'
-				+ filterValue
-				+ '</div>';
-			html += '<td style="padding:0px;">' + filterHtml + '</td>';
-		});
-		html += '</tr>';
+	var match = function (text, matchingText, caseSensitive) {
+		let match = false;
 
-		/*rows*/
-		let start = this.tableSettings['start'];
-		let end = this.tableSettings['end'];
-		var filteredData = this.getFiltered().slice(start - 1, end);
-		filteredData.forEach((row, index) => {
-			var rowsStyle = (col) => {
-				return { ...(this.tableSettings.rowsStyle || ''), ...(col.rowsStyle || '') };
-			};
-			var oddEvenRowsStyle = (col) => {
-				return (index % 2 === 1 ? this.tableSettings.evenRowsStyle : this.tableSettings.oddRowsStyle);
-			};
-			html += '<tr>';
-			this.tableSettings['columns'].forEach((col) => {
-				var cellData = row[col['data']] !== null ? row[col['data']] : '';
-				if (col.modifier) {
-					if (typeof col.modifier === 'function') {
-						var clone = Object.assign({}, row);
-						cellData = col.modifier(clone);
+		try {
+			if (text === null && matchingText !== '') {
+				return false;
+			} else if (matchingText.trim() === "") {
+				match = true;
+			} else {
+				let regex = matchingText.trim().startsWith("regex:");
+
+				if (regex) {
+					let regexPattern = new RegExp(matchingText.trim().substring(6));
+					match = regexPattern.test(text);
+				} else {
+					if (!caseSensitive) {
+						text = text.toUpperCase();
+						matchingText = matchingText.toUpperCase();
 					}
+
+					let values = [];
+					let isQuoteOpen = false;
+					let currentWord = "";
+
+					for (let i = 0; i < matchingText.length; i++) {
+						let char = matchingText[i];
+
+						if (!isQuoteOpen && (char === " " || char === "," || char === "+" || char === "\t")) {
+							if (currentWord !== "") {
+								values.push(currentWord);
+								currentWord = "";
+							}
+						} else if (char === "\"") {
+							isQuoteOpen = !isQuoteOpen;
+
+							if (!isQuoteOpen && currentWord !== "") {
+								values.push(currentWord);
+								currentWord = "";
+							}
+						} else {
+							currentWord += char;
+						}
+					}
+
+					if (currentWord !== "") {
+						values.push(currentWord);
+					}
+
+					let exclusionSet = [];
+					let inclusionSet = [];
+
+					for (let value of values) {
+						if (value.startsWith("-")) {
+							exclusionSet.push(value.substring(1));
+						} else {
+							inclusionSet.push(value);
+						}
+					}
+
+					/*handle excludes*/
+					let exclusiveMatch = true;
+					for (let value of exclusionSet) {
+						exclusiveMatch = exclusiveMatch && text.indexOf(value) === -1;
+					}
+
+					/*handle includes*/
+					let inclusiveMatch = inclusionSet.length === 0;
+					for (let value of inclusionSet) {
+						inclusiveMatch = inclusiveMatch || text.indexOf(value) !== -1;
+					}
+
+					match = exclusiveMatch && inclusiveMatch;
 				}
-				html += '<td style="' + this.toStyleString({ ...oddEvenRowsStyle(col), ...rowsStyle(col) }) + '">' + cellData + '</td>';
+			}
+		} catch (e) {
+			throw new Error("error caught @ match(" + text + ", " + matchingText + ", " + (caseSensitive ? "true" : "false") + "): " + e);
+		}
+
+		return match;
+	}
+
+	var editData = function (index, data, value) {
+		try {
+			let row = tableData.find((row) => {
+				return row['row-index'] === index;
+			});
+			if (row[data] !== value) {
+				if (row['ori-' + data] === undefined) {
+					row['ori-' + data] = row[data];
+				} else if (row['ori-' + data] === value) {
+					delete row['ori-' + data];
+				}
+				row[data] = value;
+				setEdited();
+				refreshTable();
+			}
+			return this;
+		} catch (err) {
+			throw new Error("error caught @ editData(" + index + ", " + data + ", " + value + "): " + err);
+		}
+	}
+
+	var stringToAscii = function (str) {
+		try {
+			let ascii = "";
+			for (let i = 0; i < str.length; i++) {
+				let charCode = str.charCodeAt(i);
+				ascii += "&#" + charCode + ";";
+			}
+			return ascii;
+		} catch (err) {
+			throw new Error("error caught @ stringToAscii(" + str + "): " + err);
+		}
+	}
+
+	var printTable = function () {
+		try {
+			var html = "";
+
+			sortRows();
+			filterRows();
+
+			html += "<table style='width:100%;height:min-content;border-collapse: collapse;'><tbody>";
+
+			/*headers*/
+			html += "<tr>";
+			tableSettings['columns'].forEach((col) => {
+				var headerStyle = { ...(tableSettings['headersStyle'] || {}), ...(col['headerStyle'] || {}) };
+				var headerHtml = '<div'
+					+ ' style="' + toStyleString(headerStyle) + '"'
+					+ ' class="sort-header ' + (tableSettings['sortedBy'] === col['data'] ? 'sorting' : '') + '"'
+					+ ' onclick="' + identifier + '.setSorting(\'' + col['data'] + '\', ' + (tableSettings['sortedBy'] === col['data'] ? !tableSettings['ascending'] : tableSettings['ascending']) + ').refreshTable()"'
+					+ '>'
+					+ '<div style="flex:1;"></div>'
+					+ col.header
+					+ (tableSettings['sortedBy'] === col['data'] ? (tableSettings['ascending'] ? '&#9650;' : '&#9660;') : '')
+					+ '<div style="flex:1;"></div>'
+					+ '</div>';
+				html += '<td style="padding:0px;">' + headerHtml + '</td>';
 			});
 			html += '</tr>';
-		});
 
-		html += '</tbody></table>';
+			/*filters*/
+			html += '<tr>';
+			tableSettings['columns'].forEach((col) => {
+				var filterStyle = toStyleString({ ...(tableSettings['filtersStyle'] || {}), ...(col['filterStyle'] || {}) });
+				var filterValue = col['filter'] || '';
+				var filterHtml = '<div'
+					+ ' style="' + filterStyle + '"'
+					+ ' onclick="let val = prompt(\'' + tableSettings['editFilter'] + '\',\'' + stringToAscii(filterValue) + '\'); if(val!=null){' + identifier + '.setFilter(' + tableSettings['columns'].indexOf(col) + ',val).filterRows().resetPageNumbers().refreshTable();}"'
+					+ '>'
+					+ filterValue
+					+ '</div>';
+				html += '<td style="padding:0px;">' + filterHtml + '</td>';
+			});
+			html += '</tr>';
 
-		html = "<div style='position:relative;width:100%;display:flex;flex-flow:column nowrap;justify-content:flex-start;align-items:center;row-gap:3px;'>"
-			+ "<div style='width:100%;display:flex;flex-flow:row wrap;justify-content:flex-start;align-items:center;column-gap:3px;'>"
-			+ "<div>" + this.tableSettings['label'] + "</div>"
-			+ "<div style='flex:1;'></div>"
-			+ "<div style='" + this.tableSettings['actionsGroupStyle'] + "'>"
-			+ "<div style='display:flex;flex-flow:row wrap;justify-content:flex-start;align-items:center;column-gap:3px;'>"
-			+ this.printSelectingGroup()
-			+ this.printResetFiltersButton()
-			+ this.printResetEditsButton()
-			+ "</div>"
-			+ "</div>"
-			+ "</div>"
-			+ "<div style='width:100%;overflow:auto;" + (this.tableSettings['maxHeight'] ? " max-height:" + this.tableSettings['maxHeight'] + ";" : "") + "'>" + html + "</div>"
-			+ this.printPaginationGroup()
-			+ '</div>\n';
+			/*rows*/
+			let start = tableSettings['start'];
+			let end = tableSettings['end'];
+			var filteredData = getFiltered().slice(start - 1, end);
+			filteredData.forEach((row, index) => {
+				var rowsStyle = (col) => {
+					return { ...(tableSettings.rowsStyle || ''), ...(col.rowsStyle || '') };
+				};
+				var oddEvenRowsStyle = (col) => {
+					return (index % 2 === 1 ? tableSettings.evenRowsStyle : tableSettings.oddRowsStyle);
+				};
+				html += '<tr>';
+				tableSettings['columns'].forEach((col) => {
+					var cellData = row[col['data']] !== null ? row[col['data']] : '';
+					if (col.modifier) {
+						if (typeof col.modifier === 'function') {
+							var clone = Object.assign({}, row);
+							cellData = col.modifier(clone);
+						}
+					}
+					html += '<td style="' + toStyleString({ ...oddEvenRowsStyle(col), ...rowsStyle(col) }) + '">' + cellData + '</td>';
+				});
+				html += '</tr>';
+			});
 
-		return html;
-	} catch (err) {
-		throw new Error("error caught @ printTable(): " + err);
-	}
-}
+			html += '</tbody></table>';
 
-InteractiveTable.prototype.fillTable = function (id) {
-	try {
-		if (document.getElementById(id) !== null) {
-			this.resetPageNumbers();
-			document.getElementById(id).innerHTML = this.printTable();
+			html = "<div style='position:relative;width:100%;display:flex;flex-flow:column nowrap;justify-content:flex-start;align-items:center;row-gap:3px;'>"
+				+ "<div style='width:100%;display:flex;flex-flow:row wrap;justify-content:flex-start;align-items:center;column-gap:3px;'>"
+				+ "<div>" + tableSettings['label'] + "</div>"
+				+ "<div style='flex:1;'></div>"
+				+ "<div style='" + tableSettings['actionsGroupStyle'] + "'>"
+				+ "<div style='display:flex;flex-flow:row wrap;justify-content:flex-start;align-items:center;column-gap:3px;'>"
+				+ printSelectingGroup()
+				+ printResetFiltersButton()
+				+ printResetEditsButton()
+				+ "</div>"
+				+ "</div>"
+				+ "</div>"
+				+ "<div style='width:100%;overflow:auto;" + (tableSettings['maxHeight'] ? " max-height:" + tableSettings['maxHeight'] + ";" : "") + "'>" + html + "</div>"
+				+ printPaginationGroup()
+				+ '</div>\n';
+
+			return html;
+		} catch (err) {
+			throw new Error("error caught @ printTable(): " + err);
 		}
-		this.container = id;
-		return this;
-	} catch (err) {
-		throw new Error("error caught @ fillTable(" + id + "): " + err);
 	}
-}
 
-InteractiveTable.prototype.refreshTable = function () {
-	try {
-		if (document.getElementById(this.container) !== null) {
-			document.getElementById(this.container).innerHTML = this.printTable();
+	var fillTable = function (id) {
+		try {
+			if (document.getElementById(id) !== null) {
+				resetPageNumbers();
+				document.getElementById(id).innerHTML = printTable();
+			}
+			container = id;
+			return this;
+		} catch (err) {
+			throw new Error("error caught @ fillTable(" + id + "): " + err);
 		}
-		return this;
-	} catch (err) {
-		throw new Error("error caught @ refreshTable(): " + err);
 	}
-}
 
+	var refreshTable = function () {
+		try {
+			if (document.getElementById(container) !== null) {
+				document.getElementById(container).innerHTML = printTable();
+			}
+			return this;
+		} catch (err) {
+			throw new Error("error caught @ refreshTable(): " + err);
+		}
+	}
+
+	return {
+		setData, resetData, setTableSettings, getTableSettings,
+		setSelected, setAllSelected, setAllFilteredSelected,
+		cleanKeys, removeKeys, getData, getSelected, getFiltered, getEdited, sortAsOriginal,
+		filterRows, setSorting, sortRows, setStart, setEnd,
+		toBegining, priviousPage, nextPage, toEnding,
+		printCheckBox, printSelectingGroup, printResetFiltersButton, printResetEditsButton, printPaginationGroup,
+		setFilter, resetFilters, resetPageNumbers, editData, printTable, fillTable, refreshTable
+	};
+
+}
