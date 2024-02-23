@@ -63,11 +63,11 @@
 		// set the settings for the table
 		myTable.setTableSettings({
 			columns: [
-				{ "header": "Select", "data": "row-selected", "rowsStyle": { "width": "1%" }, "modifier": new Function('row', 'return myTable.printCheckBox(row);') },
+				{ "header": "Select", "data": "row-selected", "rowsStyle": { "width": "1%" }, "modifier": (row) => { return myTable.printCheckBox(row); } },
 				{ "header": "Name", "data": "name" },
-				{ "header": "Birth At", "data": "datetimeOfBirth", "rowsStyle": { "width": "1%" }, "modifier": new Function('row', 'return "<input type=\'datetime-local\' disabled value=\'" + row["datetimeOfBirth"] + "\'></input>";') },
-				{ "header": "Age", "data": "age", "modifier": new Function('row', 'return "<input type=\'text\' style=\'max-width:50%;text-align:center;\' value=\'" + row.age + "\' onchange=\'myTable.editData("+row[\'row-index\']+","+"&apos;age&apos;"+ ",this.value)\'></input>";') },
-				{ "header": "Title", "data": "title" },
+				{ "header": "Birth At", "data": "datetimeOfBirth", "rowsStyle": { "width": "1%" }, "modifier": (row) => { return "<input type=\'datetime-local\'  onchange=\'myTable.editData(" + row['row-index'] + "," + "&apos;datetimeOfBirth&apos;" + ",this.value).refreshTable()\' value=\'" + row["datetimeOfBirth"] + "\'></input>"; } },
+				{ "header": "Age", "data": "age", "modifier": (row) => { return "<input type=\'text\' style=\'max-width:50%;text-align:center;\' value=\'" + row.age + "\'(row['ori-' + col['data']] !== row[col['data']]) onchange=\'myTable.editData(" + row['row-index'] + "," + "&apos;age&apos;" + ",this.value).refreshTable()\'></input>"; } },
+				{ "header": "Title", "data": "title", "modifier": (row) => { return "<input type=\'text\' disabled value=\'" + row.title + "\'></input>" } },
 				{ "header": "Location Location Location", "data": "location" }
 			],
 			start: 1,
