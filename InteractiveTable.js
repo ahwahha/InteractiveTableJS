@@ -35,8 +35,10 @@ function InteractiveTable(id) {
 		"selectAllFiltered": 'Select all filtered',
 		"unselectAllFiltered": 'Unselect all filtered',
 		"noOfSelected": 'No. of selected: ',
+		"noOfEdited": 'No. of edited: ',
 		"resetFilters": 'Reset filters',
-		"resetEdits": 'Reset edits',
+		"resetData": 'Reset data',
+		"resetSelectedData": 'Reset selected data',
 		"editFilter": 'Edit filter value:',
 		"toBegining": '<<',
 		"previousPage": '<',
@@ -69,15 +71,20 @@ function InteractiveTable(id) {
 		"oddRowsStyle": {},
 		"evenRowsStyle": {
 			"background-color": "#f9f9f9"
+		},
+		"editedStyle": {
+			"display": "none",
+			"color": "hsl(0, 100%, 30%)",
+			"font-size": "80%"
 		}
 	};
 	var tableSettings = JSON.parse(JSON.stringify(tableDefaultSettings));
 
-	getTableSettings = function () {
+	var getTableSettings = function () {
 		return tableSettings;
 	}
 
-	toStyleString = function (obj) {
+	var toStyleString = function (obj) {
 		try {
 			var output = '';
 			for (let [key, value] of Object.entries(obj || {})) {
@@ -106,13 +113,29 @@ function InteractiveTable(id) {
 		}
 	}
 
-	var resetData = function (data) {
+	var resetData = function () {
 		try {
-			edited = false;
 			tableData = JSON.parse(JSON.stringify(originalTableData));
+			edited = false;
 			return this;
 		} catch (error) {
-			throw new Error("error caught @ resetData(" + data + "): " + error);
+			throw new Error("error caught @ resetData(): " + error);
+		}
+	}
+
+	var resetSelectedData = function () {
+		try {
+			var rows = getEdited(getSelected());
+			for (let i = 0; i < rows.length; i++) {
+				let row = rows[i];
+				let oriRow = originalTableData.find(origDataRow => origDataRow['row-index'] === row['row-index']);
+				let dataRow = tableData.find(dataRow => dataRow['row-index'] === row['row-index']);
+				Object.assign(dataRow, oriRow);
+			}
+			setEdited();
+			return this;
+		} catch (error) {
+			throw new Error("error caught @ resetSelectedData(): " + error);
 		}
 	}
 
@@ -125,6 +148,7 @@ function InteractiveTable(id) {
 			tableSettings['rowsStyle'] = { ...tableDefaultSettings['rowsStyle'], ...newSettings['rowsStyle'] };
 			tableSettings['oddRowsStyle'] = { ...tableDefaultSettings['oddRowsStyle'], ...newSettings['oddRowsStyle'] };
 			tableSettings['evenRowsStyle'] = { ...tableDefaultSettings['evenRowsStyle'], ...newSettings['evenRowsStyle'] };
+			tableSettings['editedStyle'] = { ...tableDefaultSettings['editedStyle'], ...newSettings['editedStyle'] };
 
 			return this;
 		} catch (error) {
@@ -238,21 +262,21 @@ function InteractiveTable(id) {
 	var setEdited = function (arr) {
 		try {
 			arr = (arr || tableData);
+			edited = false;
 			for (let i = 0; i < arr.length; i++) {
 				let row = arr[i];
 				let oriRow = originalTableData.find(origDataRow => origDataRow['row-index'] === row['row-index']);
-				edited = false;
 				let isEdited = false;
 				for (let key in row) {
-					if (!key.startsWith('row-')) {
-						if (row[key] !== oriRow[key]) {
+					if (!key.startsWith('row-') && !key.startsWith('ori-')) {
+						if (row[key] != oriRow[key]) {
 							isEdited = true;
 							break;
 						}
 					}
 				}
 				row['row-edited'] = isEdited;
-				edited = !(edited && isEdited);
+				edited = !(!edited && !isEdited);
 			}
 			return this;
 		} catch (error) {
@@ -538,7 +562,7 @@ function InteractiveTable(id) {
 				let noOfSelected = selectedRows.length;
 				let selectAllButton = '<button class="' + tableSettings['buttonClass'] + '" onclick="' + identifier + '.setAllFilteredSelected(true).refreshTable()">' + tableSettings.selectAllFiltered + '</button>';
 				let unselectAllButton = '<button class="' + tableSettings['buttonClass'] + '" onclick="' + identifier + '.setAllFilteredSelected(false).refreshTable()">' + tableSettings.unselectAllFiltered + '</button>';
-				return '<div style="display:flex;flex-flow:row wrap;justify-content:flex-start;align-items:center;column-gap:3px;">' + tableSettings.noOfSelected + noOfSelected + ' <div style="display:flex;flex-flow:row wrap;justify-content:flex-start;align-items:center;column-gap:3px;">' + selectAllButton + unselectAllButton + '</div></div>';
+				return '<div style="display:flex;flex-flow:row wrap;justify-content:flex-start;align-items:center;column-gap:3px;"><div ' + (noOfSelected > 0 ? '' : 'style="display:none;"') + '>' + tableSettings.noOfSelected + noOfSelected + '</div> <div style="display:flex;flex-flow:row wrap;justify-content:flex-start;align-items:center;column-gap:3px;">' + selectAllButton + unselectAllButton + '</div></div>';
 			} else {
 				return '';
 			}
@@ -555,11 +579,15 @@ function InteractiveTable(id) {
 		}
 	}
 
-	var printResetEditsButton = function () {
+	var printEditedGroup = function () {
 		try {
-			return edited ? '<button class="' + tableSettings['buttonClass'] + '" onclick="' + identifier + '.resetData().filterRows().resetPageNumbers().refreshTable();">' + tableSettings.resetEdits + '</button>' : '';
+			let editedRows = tableData.filter(row => row['row-edited']);
+			let noOfEdited = editedRows.length;
+			let resetDataButton = '<button class="' + tableSettings['buttonClass'] + '" onclick="' + identifier + '.resetData().refreshTable();">' + tableSettings.resetData + '</button>';
+			let resetSelectedDataButton = '<button class="' + tableSettings['buttonClass'] + '" onclick="' + identifier + '.resetSelectedData().refreshTable();">' + tableSettings.resetSelectedData + '</button>';
+			return !edited ? '' : '<div style="display:flex;flex-flow:row wrap;justify-content:flex-start;align-items:center;column-gap:3px;">' + tableSettings.noOfEdited + noOfEdited + ' <div style="display:flex;flex-flow:row wrap;justify-content:flex-start;align-items:center;column-gap:3px;">' + resetDataButton + resetSelectedDataButton + '</div></div>';
 		} catch (err) {
-			throw new Error("error caught @ printResetEditsButton() - " + err);
+			throw new Error("error caught @ printSelectingGroup() - " + err);
 		}
 	}
 
@@ -703,7 +731,6 @@ function InteractiveTable(id) {
 				}
 				row[data] = value;
 				setEdited();
-				refreshTable();
 			}
 			return this;
 		} catch (err) {
@@ -786,7 +813,9 @@ function InteractiveTable(id) {
 							cellData = col.modifier(clone);
 						}
 					}
-					html += '<td style="' + toStyleString({ ...oddEvenRowsStyle(col), ...rowsStyle(col) }) + '">' + cellData + '</td>';
+					var edited = ((row['ori-' + col['data']]) == undefined || (row['ori-' + col['data']] == row[col['data']])) ? false : (row['ori-' + col['data']] != row[col['data']]);
+					console.log(tableSettings.editedStyle);
+					html += '<td style="' + toStyleString({ ...oddEvenRowsStyle(col), ...rowsStyle(col) }) + '">' + cellData + (edited ? '<br><span style="' + toStyleString(tableSettings.editedStyle) + '">(' + row['ori-' + col['data']] + ')</span>' : '') + '</td>';
 				});
 				html += '</tr>';
 			});
@@ -800,8 +829,8 @@ function InteractiveTable(id) {
 				+ "<div style='" + tableSettings['actionsGroupStyle'] + "'>"
 				+ "<div style='display:flex;flex-flow:row wrap;justify-content:flex-start;align-items:center;column-gap:3px;'>"
 				+ printSelectingGroup()
+				+ printEditedGroup()
 				+ printResetFiltersButton()
-				+ printResetEditsButton()
 				+ "</div>"
 				+ "</div>"
 				+ "</div>"
@@ -840,12 +869,11 @@ function InteractiveTable(id) {
 	}
 
 	return {
-		setData, resetData, setTableSettings, getTableSettings,
+		setData, resetData, resetSelectedData, setTableSettings, getTableSettings,
 		setSelected, setAllSelected, setAllFilteredSelected,
 		cleanKeys, removeKeys, getData, getSelected, getFiltered, getEdited, sortAsOriginal,
 		filterRows, setSorting, sortRows, setStart, setEnd,
-		toBegining, priviousPage, nextPage, toEnding,
-		printCheckBox, printSelectingGroup, printResetFiltersButton, printResetEditsButton, printPaginationGroup,
+		toBegining, priviousPage, nextPage, toEnding, printCheckBox,
 		setFilter, resetFilters, resetPageNumbers, editData, printTable, fillTable, refreshTable
 	};
 
