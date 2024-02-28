@@ -39,6 +39,7 @@ function InteractiveTable(id) {
 		"resetFilters": 'Reset filters',
 		"resetData": 'Reset data',
 		"resetSelectedData": 'Reset selected data',
+		"selectAllEdited": 'Select all edited',
 		"editFilter": 'Edit filter value:',
 		"toBegining": '<<',
 		"previousPage": '<',
@@ -57,12 +58,12 @@ function InteractiveTable(id) {
 			"background-color": "#add"
 		},
 		"filtersStyle": {
+			"width": "calc(100% - 2px)",
 			"border-radius": "5px",
 			"border": "#aaa solid 1px",
 			"margin": "1px",
 			"text-align": "center",
-			"min-height": "12px",
-			"height": "min-content",
+			"font-size": "11px",
 			"overflow": "hidden"
 		},
 		"rowsStyle": {
@@ -73,9 +74,9 @@ function InteractiveTable(id) {
 			"background-color": "#f9f9f9"
 		},
 		"editedStyle": {
-			"display": "none",
+			"display": "revert",
 			"color": "hsl(0, 100%, 30%)",
-			"font-size": "80%"
+			"font-size": "70%"
 		}
 	};
 	var tableSettings = JSON.parse(JSON.stringify(tableDefaultSettings));
@@ -183,6 +184,15 @@ function InteractiveTable(id) {
 		}
 	}
 
+	var setAllEditedSelected = function (selected) {
+		try {
+			tableData = tableData.map(row => row['row-edited'] ? { ...row, 'row-selected': selected } : row);
+			return this;
+		} catch (error) {
+			throw new Error("error caught @ setAllFilteredSelected(" + selected + "): " + error);
+		}
+	}
+
 	/**
 	 * remove all properties with keys starting with 'row-' from input array
 	 * @param {*} arr array of objects
@@ -269,7 +279,7 @@ function InteractiveTable(id) {
 				let isEdited = false;
 				for (let key in row) {
 					if (!key.startsWith('row-') && !key.startsWith('ori-')) {
-						if (row[key] != oriRow[key]) {
+						if (row[key] !== oriRow[key] || row[key].length !== oriRow[key].length) {
 							isEdited = true;
 							break;
 						}
@@ -337,7 +347,9 @@ function InteractiveTable(id) {
 			tableData.forEach((row) => {
 				let isFiltered = true;
 				for (let col of tableSettings['columns']) {
-					let matching = match((row[col['data']] || '').toString(), (col['filter'] ? col['filter'] : ''), false);
+					let a = (row[col['data']] === undefined ? '' : row[col['data']]).toString();
+					let b = (col['filter'] === undefined ? '' : col['filter']).toString();
+					let matching = match(a, b, false);
 					if (!matching) {
 						isFiltered = false;
 						break;
@@ -362,8 +374,8 @@ function InteractiveTable(id) {
 			let data = tableSettings['sortedBy'];
 			let order = tableSettings['ascending'];
 			let sortedData = tableData.sort((a, b) => {
-				let aValue = a[data] || '';
-				let bValue = b[data] || '';
+				let aValue = a[data] === undefined ? '' : a[data].toString();
+				let bValue = b[data] === undefined ? '' : b[data].toString();
 				if (typeof aValue === 'boolean' || typeof bValue === 'boolean') {
 					if (aValue === bValue) {
 						return 0;
@@ -544,14 +556,14 @@ function InteractiveTable(id) {
 		}
 	}
 
-	var printCheckBox = function (row) {
+	var printSelectBox = function (row) {
 		try {
 			if (!haveSelection) {
 				haveSelection = true;
 			}
 			return '<input type="checkbox" onclick="' + identifier + (!tableSettings['multiSelect'] ? '.setAllSelected(false)' : '') + '.setSelected(' + row['row-index'] + ', checked).refreshTable();" ' + (row['row-selected'] ? 'checked' : '') + '/>';
 		} catch (error) {
-			throw new Error("error caught @ printCheckBox(" + row + "): " + error);
+			throw new Error("error caught @ printSelectBox(" + row + "): " + error);
 		}
 	}
 
@@ -562,7 +574,8 @@ function InteractiveTable(id) {
 				let noOfSelected = selectedRows.length;
 				let selectAllButton = '<button class="' + tableSettings['buttonClass'] + '" onclick="' + identifier + '.setAllFilteredSelected(true).refreshTable()">' + tableSettings.selectAllFiltered + '</button>';
 				let unselectAllButton = '<button class="' + tableSettings['buttonClass'] + '" onclick="' + identifier + '.setAllFilteredSelected(false).refreshTable()">' + tableSettings.unselectAllFiltered + '</button>';
-				return '<div style="display:flex;flex-flow:row wrap;justify-content:flex-start;align-items:center;column-gap:3px;"><div ' + (noOfSelected > 0 ? '' : 'style="display:none;"') + '>' + tableSettings.noOfSelected + noOfSelected + '</div> <div style="display:flex;flex-flow:row wrap;justify-content:flex-start;align-items:center;column-gap:3px;">' + selectAllButton + unselectAllButton + '</div></div>';
+				let selectAllEdited = !edited ? '' : '<button class="' + tableSettings['buttonClass'] + '" onclick="' + identifier + '.setAllEditedSelected(true).refreshTable();">' + tableSettings.selectAllEdited + '</button>';
+				return '<div style="display:flex;flex-flow:row wrap;justify-content:flex-start;align-items:center;column-gap:3px;"><div ' + (noOfSelected > 0 ? '' : 'style="display:none;"') + '>' + tableSettings.noOfSelected + noOfSelected + '</div> <div style="display:flex;flex-flow:row wrap;justify-content:flex-start;align-items:center;column-gap:3px;">' + selectAllButton + unselectAllButton + selectAllEdited + '</div></div>';
 			} else {
 				return '';
 			}
@@ -783,12 +796,12 @@ function InteractiveTable(id) {
 			tableSettings['columns'].forEach((col) => {
 				var filterStyle = toStyleString({ ...(tableSettings['filtersStyle'] || {}), ...(col['filterStyle'] || {}) });
 				var filterValue = col['filter'] || '';
-				var filterHtml = '<div'
-					+ ' style="' + filterStyle + '"'
-					+ ' onclick="let val = prompt(\'' + tableSettings['editFilter'] + '\',\'' + stringToAscii(filterValue) + '\'); if(val!=null){' + identifier + '.setFilter(' + tableSettings['columns'].indexOf(col) + ',val).filterRows().resetPageNumbers().refreshTable();}"'
-					+ '>'
-					+ filterValue
-					+ '</div>';
+				var filterHtml = '<input'
+					+ ' style="display:block;' + filterStyle + '"'
+					+ ' id="filter-' + col['data'] + '"'
+					+ ' value="' + filterValue + '"'
+					+ ' placeholder="' + (col['filterPlaceholder'] || '') + '"'
+					+ '></input>'
 				html += '<td style="padding:0px;">' + filterHtml + '</td>';
 			});
 			html += '</tr>';
@@ -814,7 +827,6 @@ function InteractiveTable(id) {
 						}
 					}
 					var edited = ((row['ori-' + col['data']]) == undefined || (row['ori-' + col['data']] == row[col['data']])) ? false : (row['ori-' + col['data']] != row[col['data']]);
-					console.log(tableSettings.editedStyle);
 					html += '<td style="' + toStyleString({ ...oddEvenRowsStyle(col), ...rowsStyle(col) }) + '">' + cellData + (edited ? '<br><span style="' + toStyleString(tableSettings.editedStyle) + '">(' + row['ori-' + col['data']] + ')</span>' : '') + '</td>';
 				});
 				html += '</tr>';
@@ -827,7 +839,7 @@ function InteractiveTable(id) {
 				+ "<div>" + tableSettings['label'] + "</div>"
 				+ "<div style='flex:1;'></div>"
 				+ "<div style='" + tableSettings['actionsGroupStyle'] + "'>"
-				+ "<div style='display:flex;flex-flow:row wrap;justify-content:flex-start;align-items:center;column-gap:3px;'>"
+				+ "<div style='display:flex;flex-flow:" + (edited ? "column" : "row") + " wrap;justify-content:flex-start;align-items:flex-end;column-gap:3px;'>"
 				+ printSelectingGroup()
 				+ printEditedGroup()
 				+ printResetFiltersButton()
@@ -849,6 +861,7 @@ function InteractiveTable(id) {
 			if (document.getElementById(id) !== null) {
 				resetPageNumbers();
 				document.getElementById(id).innerHTML = printTable();
+				loadFilterHandlers();
 			}
 			container = id;
 			return this;
@@ -861,6 +874,7 @@ function InteractiveTable(id) {
 		try {
 			if (document.getElementById(container) !== null) {
 				document.getElementById(container).innerHTML = printTable();
+				loadFilterHandlers();
 			}
 			return this;
 		} catch (err) {
@@ -868,12 +882,46 @@ function InteractiveTable(id) {
 		}
 	}
 
+	var loadFilterHandlers = function () {
+		var events = ['change', 'keyup', 'dragend', 'selectionchange'];
+		for (let col of tableSettings['columns']) {
+			addEventListeners(document.getElementById('filter-' + col['data']), events, () => {
+				let element = document.getElementById('filter-' + col['data']);
+				let selectionStart = element.selectionStart;
+				let selectionEnd = element.selectionEnd;
+				setFilter(tableSettings['columns'].indexOf(col), element.value);
+				filterRows();
+				resetPageNumbers();
+				refreshTable();
+				element = document.getElementById('filter-' + col['data']);
+				element.setSelectionRange(selectionStart, selectionEnd);
+				document.getElementById('filter-' + col['data']).focus();
+			});
+		}
+	}
+
+	addEventListeners = function (element, events, func) {
+		if (typeof events === 'string') {
+			element.addEventListener(events, func);
+		} else if (Array.isArray(events)) {
+			events.forEach((event) => {
+				if (typeof event === 'string') {
+					element.addEventListener(event, func);
+				} else {
+					throw 'invalid events in input list:' + e;
+				}
+			});
+		} else {
+			throw 'invalid event input list:' + e;
+		}
+	};
+
 	return {
 		setData, resetData, resetSelectedData, setTableSettings, getTableSettings,
-		setSelected, setAllSelected, setAllFilteredSelected,
-		cleanKeys, removeKeys, getData, getSelected, getFiltered, getEdited, sortAsOriginal,
-		filterRows, setSorting, sortRows, setStart, setEnd,
-		toBegining, priviousPage, nextPage, toEnding, printCheckBox,
+		setSelected, setAllSelected, setAllFilteredSelected, setAllEditedSelected,
+		cleanKeys, removeKeys, getData, getSelected, getFiltered, getEdited,
+		filterRows, sortAsOriginal, setSorting, sortRows,
+		toBegining, priviousPage, nextPage, toEnding, printSelectBox,
 		setFilter, resetFilters, resetPageNumbers, editData, printTable, fillTable, refreshTable
 	};
 
